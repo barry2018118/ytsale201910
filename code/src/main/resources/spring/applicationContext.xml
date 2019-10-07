@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xsi:schemaLocation="
+          http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+          http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+          http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+	<!-- 让Spring可以使用Annotation注释功能（当component-scan也存在时，此配置会被忽略 -->
+	<context:annotation-config />
+	<!-- 设置Spring使用自动扫描功能，使"base-package"中的对象可以使用Annotation配置 -->
+	<context:component-scan base-package="com.yuntu.sale" />  
+
+	<!-- 读入配置属性文件 -->
+	<bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:db/*.properties</value>
+				<value>classpath:conf/*.properties</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- proxy-target-class默认"false",更改为"ture"使用CGLib动态代理 -->
+	<aop:aspectj-autoproxy expose-proxy="true" />
+	
+	<!-- 引用配置文件 -->
+	<import resource="classpath:spring/spring-datasources.xml" />
+    <import resource="classpath:spring/spring-mvc.xml"/>
+	<import resource="classpath:spring/spring-service-manage.xml" />
+	<import resource="classpath:spring/jobs/tasks.xml" />
+	
+	<!-- 
+	   <import resource="classpath:spring/jobs/jobs.xml" />
+	   <import resource="classpath:spring/jobs/spring-redis" />
+    -->
+    
+</beans>

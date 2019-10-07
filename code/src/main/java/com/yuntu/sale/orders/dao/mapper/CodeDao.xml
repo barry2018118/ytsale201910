@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.orders.dao.CodeDao">
+    
+	<sql id="codeColumns">
+		a.id AS "id",
+		a.orders_id AS "ordersId",
+		a.card_pwd AS "cardPwd",
+		a.code_name AS "codeName",
+		a.sproduct_id AS "sproductId",
+		a.enterprise_id AS "enterpriseId",
+		a.shop_id AS "shopId",
+		a.num AS "num",
+		a.startTim AS "starttim",
+		FROM_UNIXTIME(a.startTim,'%Y-%m-%d %H:%m:%s') AS "starttimtime",
+		a.endTim AS "endtim",
+		FROM_UNIXTIME(a.endTim,'%Y-%m-%d %H:%m:%s') AS "endtimtime",
+		a.printnum AS "printnum",
+		a.locknum AS "locknum",
+		a.clocknum AS "clocknum",
+		a.tuanname AS "tuanname",
+		a.real_name AS "realName",
+		a.status AS "status",
+		a.updated_at AS "updatedAt",
+		FROM_UNIXTIME(a.updated_at,'%Y-%m-%d %H:%m:%s') AS "updatedAttime",
+		a.version AS "version",
+		CASE
+            WHEN a.status=1 THEN '等待支付'
+            WHEN a.status=2 THEN '等待发码'
+            WHEN a.status=3 THEN '已全部退款'
+            WHEN a.status=4 THEN '已成功消费'
+            WHEN a.status=5 THEN '全部消费部分退款'
+            WHEN a.status=6 THEN '全部消费全部退款'
+            WHEN a.status=7 THEN '部分消费部分退款'
+            WHEN a.status=10 THEN '未消费'
+            WHEN a.status=11 THEN '未消费部分退款'
+            WHEN a.status=12 THEN '部分消费未退款'
+            WHEN a.status=13 THEN '部分消费部分退款'
+            WHEN a.status=14 THEN '未消费退款审核中'
+            WHEN a.status=15 THEN '已消费退款审核中'
+            WHEN a.status=16 THEN '第三方发码失败'
+            ELSE '其它'
+        END AS "statusName"
+	</sql>
+	
+	<sql id="codeJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="com.yuntu.sale.orders.po.Code">
+		SELECT 
+			<include refid="codeColumns"/>
+		FROM t_code a
+		<include refid="codeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.yuntu.sale.orders.po.Code">
+		SELECT 
+			<include refid="codeColumns"/>
+		FROM t_code a
+		<include refid="codeJoins"/>
+		<where>
+			
+			<if test="ordersId != null and ordersId != ''">
+				AND a.orders_id = #{ordersId}
+			</if>
+			<if test="cardPwd != null and cardPwd != ''">
+				AND a.card_pwd = #{cardPwd}
+			</if>
+			<if test="codeName != null and codeName != ''">
+				AND a.code_name = #{codeName}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="com.yuntu.sale.orders.po.Code">
+		SELECT 
+			<include refid="codeColumns"/>
+		FROM t_code a
+		<include refid="codeJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	<select id="queryOrderList" resultType="com.yuntu.sale.orders.po.Code">
+		SELECT
+		<include refid="codeColumns"/>
+		FROM t_code a
+		WHERE a.orders_id = #{id}
+	</select>
+	
+	<insert id="save"  useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.orders.po.Code">
+		INSERT INTO t_code(
+			orders_id,
+			card_pwd,
+			code_name,
+			sproduct_id,
+			enterprise_id,
+			shop_id,
+			num,
+			startTim,
+			endTim,
+			printnum,
+			locknum,
+			clocknum,
+			tuanname,
+			real_name,
+			status,
+			updated_at,
+			version
+		) VALUES (
+			#{ordersId},
+			#{cardPwd},
+			#{codeName},
+			#{sproductId},
+			#{enterpriseId},
+			#{shopId},
+			#{num},
+			#{starttim},
+			#{endtim},
+			#{printnum},
+			#{locknum},
+			#{clocknum},
+			#{tuanname},
+			#{realName},
+			#{status},
+			#{updatedAt},
+			#{version}
+		)
+	</insert>
+	
+	<update id="update"  parameterType="com.yuntu.sale.orders.po.Code">
+		UPDATE t_code SET 	
+			orders_id = #{ordersId},
+			card_pwd = #{cardPwd},
+			code_name = #{codeName},
+			sproduct_id = #{sproductId},
+			enterprise_id = #{enterpriseId},
+			shop_id = #{shopId},
+			num = #{num},
+			starttim = #{starttim},
+			endtim = #{endtim},
+			printnum = #{printnum},
+			locknum = #{locknum},
+			clocknum = #{clocknum},
+			tuanname = #{tuanname},
+			real_name = #{realName},
+			status = #{status},
+			updated_at = #{updatedAt},
+			version = #{version}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete"  parameterType="Long">
+		DELETE FROM t_code
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic" parameterType="Long">
+		UPDATE t_code SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="com.yuntu.sale.orders.po.Code" statementType="STATEMENT">
+		select * FROM t_code  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

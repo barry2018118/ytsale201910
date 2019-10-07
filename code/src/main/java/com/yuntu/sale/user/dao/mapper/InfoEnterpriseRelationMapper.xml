@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.user.dao.InfoEnterpriseRelationDao">
+
+	<sql id="queryColumns">
+		id,
+		child_id, 
+		parent_id, 
+		create_enterprise, 
+		create_type
+	</sql>
+
+    <!-- 保存 -->
+    <insert id="insert" parameterType="com.yuntu.sale.user.po.InfoEnterpriseRelation">
+        INSERT INTO t_enterprise_relation(
+            id,
+            child_id, 
+            parent_id, 
+            create_enterprise, 
+            create_type
+        ) VALUES (
+	        #{id},
+	        #{childId},
+	        #{parentId}, 
+	        #{createEnterprise}, 
+	        #{createType}
+        )
+    </insert>
+
+</mapper>

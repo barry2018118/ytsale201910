@@ -1,0 +1,134 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+       http://www.springframework.org/schema/task 
+       http://www.springframework.org/schema/task/spring-task.xsd
+       http://www.springframework.org/schema/aop 
+       http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<context:component-scan base-package="com.yuntu.sale">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+		<context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice" />
+	</context:component-scan>
+	
+	<!-- 默认的注解映射的支持，org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping -->
+	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
+		<mvc:message-converters register-defaults="true">
+			<!-- 将StringHttpMessageConverter的默认编码设为UTF-8 -->
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+		    	<constructor-arg value="UTF-8" />
+			</bean>
+			<!-- 将Jackson2HttpMessageConverter的默认格式化输出为false -->
+			<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="supportedMediaTypes">
+                	<list><value>application/json;charset=UTF-8</value></list>
+                </property>
+            </bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+    
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver">  
+        <property name="defaultLocale" value="zh_CN"/>  
+    </bean>  
+   
+	<mvc:annotation-driven  conversion-service="conversionService" content-negotiation-manager="contentNegotiationManager" enable-matrix-variables="true">
+		<!-- 异步支持 默认30秒超时 -->
+		<mvc:async-support default-timeout="30000" task-executor="executor" />
+		<mvc:message-converters register-defaults="true">
+			<!-- 避免IE执行AJAX时,返回JSON出现下载文件 -->
+			<bean id="fastJsonHttpMessageConverter" class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>application/json;charset=UTF-8</value>
+					</list>
+				</property>
+				<!--<property name="serializerFeature"> -->
+				<!--这个地方加上这个功能吧，能自己配置一些东西，比如时间的格式化，null输出""等等 -->
+				<!--</property> -->
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	<mvc:annotation-driven/>
+	
+	<!-- 静态资源映射 -->
+	<mvc:resources mapping="/static/**" location="/WEB-INF/static/" />
+	<!-- 默认的视图解析器 在上边的解析错误时使用 (默认使用html)- -->
+	<bean id="defaultViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:order="1">
+		<property name="contentType" value="text/html" />
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+	</bean>
+	
+	<!-- mvc:annotation-driven 中的属性信息配置 -->
+	<!-- 类型转换及数据格式化 -->
+	<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean" />
+	<!-- 如下实现是通过线程池执行的 -->
+	<task:executor id="executor" pool-size="10"/>
+	
+	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+		<!-- 扩展名至mimeType的映射,即 /user.json => application/json -->
+		<property name="favorPathExtension" value="true" />
+		<!-- 用于开启 /userinfo/123?format=json 的支持 -->
+		<property name="favorParameter" value="true" />
+		<property name="parameterName" value="format" />
+		<!-- 是否忽略Accept Header -->
+		<property name="ignoreAcceptHeader" value="false" />
+
+		<property name="mediaTypes"> <!--扩展名到MIME的映射；favorPathExtension, favorParameter是true时起作用 -->
+			<value>
+				json=application/json
+				xml=application/xml
+				html=text/html
+			</value>
+		</property>
+		<!-- 默认的content type -->
+		<property name="defaultContentType" value="text/html" />
+	</bean>
+	
+	<!-- 配置springMVC处理上传文件的信息 -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">  
+        <property name="defaultEncoding" value="utf-8"/>  
+        <property name="maxUploadSize" value="10485760000"/>  
+        <property name="maxInMemorySize" value="40960"/>  
+    </bean>
+    
+    
+    <!-- 扫描自定义注释
+    <context:component-scan base-package="com.coolshow.erp.annotation" />
+    <context:component-scan base-package="com.coolshow.erp.aspect" />
+    <aop:aspectj-autoproxy proxy-target-class="true"/> -->
+    
+	 <!-- 登陆认证的拦截器 -->	
+	<mvc:interceptors>  
+		<mvc:interceptor>
+	    	<mvc:mapping path="/**"/>
+	    	<mvc:exclude-mapping path="/static/**" />
+	    	<mvc:exclude-mapping path="/" />
+	    	<mvc:exclude-mapping path="/index" />
+	    	<mvc:exclude-mapping path="/login" />
+	    	<mvc:exclude-mapping path="/masteruser/login" />
+	    	<mvc:exclude-mapping path="/kaptcha/vcode" />
+	    	<mvc:exclude-mapping path="/authCode" />
+	    	<mvc:exclude-mapping path="/getPhoneCode" />
+	    	<mvc:exclude-mapping path="/test/**" />
+	    	<mvc:exclude-mapping path="/orders/third/**" />
+	    	<mvc:exclude-mapping path="/pay/alipay/**" />
+	    	<mvc:exclude-mapping path="/login2" />
+	    	
+	    	<bean class="com.yuntu.sale.base.interceptor.LoginInterceptor" />
+    	</mvc:interceptor>
+        <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/> 
+    </mvc:interceptors>
+	
+</beans>

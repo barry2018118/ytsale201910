@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.capital.dao.EnterpriseStorageLogDao">
+
+	<sql id="queryColumns">
+		id,
+		parent_id,
+		child_id,
+		before_money,
+		storage_money,
+		after_money,
+		create_id,
+		create_time
+	</sql>
+	<!-- 通过Id查询 -->
+	<select id="queryById" resultType="com.yuntu.sale.capital.po.EnterpriseStorageLogPo">
+		SELECT
+		<include refid="queryColumns" />
+		FROM t_enterprise_storage_log
+		WHERE id = #{id}
+	</select>
+	<!-- 通过ParentId查询 -->
+	<select id="queryByParentId" resultType="com.yuntu.sale.capital.po.EnterpriseStorageLogPo">
+		SELECT
+		<include refid="queryColumns" />
+		FROM t_enterprise_storage_log
+		WHERE parent_id = #{parentId}
+		ORDER BY create_time DESC
+	</select>
+	<!-- 通过ChildId查询 -->
+	<select id="queryByChildId" resultType="com.yuntu.sale.capital.po.EnterpriseStorageLogPo">
+		SELECT
+		<include refid="queryColumns" />
+		FROM t_enterprise_storage_log
+		WHERE child_id = #{childId}
+		ORDER BY create_time DESC
+	</select>
+	<!-- 检索查询 -->
+	<select id="querySearch" resultType="com.yuntu.sale.capital.po.EnterpriseStorageLogPo">
+		SELECT
+		<include refid="queryColumns" />
+		FROM t_enterprise_storage_log
+		<where>
+			1 = 1
+			<if test="childId != null and childId != '' and parentId != null and parentId != ''">
+				AND child_id = #{childId} AND parent_id = #{parentId}
+			</if>
+		</where>
+		ORDER BY create_time DESC
+	</select>
+
+	<!-- 新增 -->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.capital.po.EnterpriseStorageLogPo">
+		INSERT INTO t_enterprise_storage_log(
+		<include refid="queryColumns" />
+		) VALUES (
+		#{id},
+		#{parentId},
+		#{childId},
+		#{beforeMoney},
+		#{storageMoney},
+		#{afterMoney},
+		#{createId},
+		#{createTime}
+		)
+	</insert>
+
+	<!-- 修改 -->
+	<update id="save" parameterType="com.yuntu.sale.capital.po.EnterpriseStorageLogPo">
+		UPDATE
+		t_enterprise_storage_log
+		SET
+		parent_id = #{parentId},
+		child_id = #{childId},
+		before_money = #{beforeMoney},
+		storage_money = #{beforeMoney},
+		after_money = #{afterMoney},
+		WHERE
+		id = #{id}
+	</update>
+
+</mapper>

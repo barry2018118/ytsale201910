@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.manage.dao.role.InfoRoleDao">
+
+	<sql id="role">
+		id ,
+		title ,
+		descript ,
+		sort_no ,
+		enterprise_id,
+		create_id ,
+		create_time ,
+		update_id ,
+		update_time
+	</sql>
+
+	<!-- 查询角色详情 -->
+	<select id="selectByPrimaryKey" resultType="com.yuntu.sale.base.po.role.InfoRole">
+		select
+		<include refid="role" />
+		from info_role
+		where id = #{id} AND is_delete != 1
+	</select>
+
+	<!-- 查所有角色and条件查询 -->
+	<select id="search" resultType="com.yuntu.sale.base.po.role.InfoRole">
+		SELECT
+		<include refid="role" />
+		FROM info_role
+		<where>
+			is_delete != 1
+			<if test="title != null and title != ''">
+				AND title like CONCAT(CONCAT('%', #{title}),'%')
+			</if>
+
+		</where>
+	</select>
+	
+	<!-- 查询企业下的角色信息 -->
+    <select id="searchByEnterpriseId" resultType="com.yuntu.sale.base.po.role.InfoRole">
+        SELECT
+            <include refid="role" />
+        FROM info_role 
+        <where>
+            is_delete != 1
+            AND enterprise_id = #{enterpriseId} 
+            <if test="title != null and title != ''">
+                AND title like CONCAT(CONCAT('%', #{title}),'%')
+            </if>
+        </where>
+    </select>
+
+	<!-- 判断角色重名 -->
+	<select id="selectByName" resultType="com.yuntu.sale.base.po.role.InfoRole">
+		select
+		<include refid="role" />
+		from info_role
+		where title = #{title}
+		AND is_delete != 1
+	</select>
+
+	<!-- 添加角色 -->
+	<insert id="insert" parameterType="com.yuntu.sale.base.po.role.InfoRole">
+		INSERT INTO info_role
+		(id ,
+		title ,
+		descript ,
+		sort_no ,
+		is_delete,
+		enterprise_id,
+		create_id ,
+		create_time ,
+		update_id ,
+		update_time )
+		VALUES (
+		#{id},
+		#{title},
+		#{descript},
+		#{sortNo},
+		#{isDelete},
+		#{enterpriseId},
+		#{createId},
+		#{createTime},
+		#{updateId},
+		#{updateTime}
+		)
+	</insert>
+
+	<!-- 编辑角色 -->
+	<update id="editByPrimaryKey" parameterType="com.yuntu.sale.base.po.role.InfoRole">
+		UPDATE info_role
+		SET
+		title = #{title},
+		descript = #{descript},
+		is_delete = #{isDelete},
+		sort_no = #{sortNo},
+		create_id = #{createId},
+		create_time = #{createTime},
+		update_id = #{updateId},
+		update_time = #{updateTime}
+		WHERE id = #{id}
+	</update>
+
+
+	<!-- 删除角色 -->
+	<update id="deleteByPrimaryKey">
+		UPDATE info_role
+		SET is_delete = 1
+		WHERE id = #{id}
+	</update>
+	<!-- 查询全部 -->
+	<select id="selectAll" resultType="com.yuntu.sale.base.po.role.InfoRole">
+		SELECT
+		<include refid="role" />
+		FROM
+		info_role
+		WHERE
+		is_delete != 1
+
+	</select>
+
+	<update id="updateByPrimaryKey" parameterType="com.yuntu.sale.base.po.role.InfoRole">
+		UPDATE info_role SET title = #{title},descript=#{descript} ,sort_no =
+		#{sortNo},update_id = #{updateId},update_time = #{updateTime} where id
+		= #{id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.report.dao.DistributorSaleReportDao">
+
+    <!-- 定义“分销商”信息 -->
+    <sql id="queryChildColumns">
+        e.id AS id, 
+        e.name AS name
+    </sql>
+    
+    <!-- 定义“订单销售”信息 -->
+    <sql id="queryOrderSaleColumns">
+        count(*) AS ordersNum, 
+        IFNULL(SUM(num), 0) AS saleNum, 
+        IFNULL(SUM(price), 0) AS saleMoney
+    </sql>
+    
+    <!-- 定义“订单消费”信息 -->
+    <sql id="queryOrderConsumeColumns">
+        IFNULL(SUM(c.printnum), 0) AS consumeNum, 
+        IFNULL(SUM(c.price), 0) AS consumeMoney
+    </sql>
+    
+    <!-- 定义“订单退款”信息 -->
+    <sql id="queryOrderRefundColumns">
+        IFNULL(SUM(eor.num), 0) AS refundNum, 
+        IFNULL(SUM(eor.deduct_price), 0) AS refundDeductMoney,
+        IFNULL(SUM(eor.refund_price), 0) AS refundMoney
+    </sql>
+    
+    
+    <!-- 查询分销商 -->
+    <select id="queryMyChild" resultType="com.yuntu.sale.report.vo.SimpleEnterpriseVo">
+        SELECT 
+            <include refid="queryChildColumns"></include>
+        FROM t_enterprise_relation er 
+        LEFT JOIN info_enterprise e ON er.child_id = e.id 
+        WHERE er.parent_id = #{parentId} 
+        <if test="childName != null and childName != ''">
+             AND e.name like CONCAT('%', #{childName}, '%') 
+        </if>
+    </select>
+    
+    <!-- 查询销售数据 -->
+    <select id="queryOrderSaleData" resultType="com.yuntu.sale.report.vo.DistributorSaleDataVo">
+        SELECT 
+            <include refid="queryOrderSaleColumns"></include>
+        FROM t_enterprise_orders 
+        WHERE parent_id = #{parentId} 
+        AND enterprise_id = #{childId} 
+        AND status > 2 
+        AND created_at >= UNIX_TIMESTAMP(#{startDate}) 
+        AND created_at &lt; UNIX_TIMESTAMP(#{endDate}) 
+    </select>
+
+    <!-- 查询消费数据 -->
+    <select id="queryOrderConsumeData" resultType="com.yuntu.sale.report.vo.DistributorSaleDataVo">
+        SELECT 
+            <include refid="queryOrderConsumeColumns"></include>
+        FROM t_orders_consume c
+        JOIN t_enterprise_orders eo ON c.orders_id = eo.orders_id 
+        WHERE eo.parent_id = #{parentId} 
+        AND eo.enterprise_id = #{childId} 
+        AND c.printtim >= UNIX_TIMESTAMP(#{startDate}) 
+        AND c.printtim &lt; UNIX_TIMESTAMP(#{endDate}) 
+    </select>
+    
+    <!-- 查询退款数据 -->
+    <select id="queryOrderRefundData" resultType="com.yuntu.sale.report.vo.DistributorSaleDataVo">
+         SELECT 
+            <include refid="queryOrderRefundColumns"></include>
+        FROM t_enterprise_orders_refund eor 
+        JOIN t_orders_refund r ON eor.refund_id = r.id 
+        WHERE eor.parent_id = #{parentId} 
+        AND eor.child_id = #{childId} 
+        AND r.status = 1 
+        AND r.audit_time >= UNIX_TIMESTAMP(#{startDate}) 
+        AND r.audit_time &lt; UNIX_TIMESTAMP(#{endDate}) 
+    </select>
+
+    
+</mapper>

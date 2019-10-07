@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.capital.dao.ExtractDao">
+
+	<sql id="queryColumns">
+		id,
+		enterprise_id,
+		bank_card_id,
+		extract_money, 
+		rate, 
+		rate_money, 
+		actual_money, 
+		status,
+		voucher,
+		reason,
+		create_id,
+		create_time, 
+		audit_id, 
+		audit_time
+	</sql>
+
+    <sql id="querySumColumns">
+        IFNULL(SUM(extract_money), 0) AS extractMoney
+    </sql>
+    
+
+	<!-- 通过Id查询 -->
+	<select id="queryById" resultType="com.yuntu.sale.capital.po.ExtractPo">
+		SELECT
+		<include refid="queryColumns" />
+		FROM t_extract
+		WHERE id = #{id}
+	</select>
+
+	<!-- 检索 -->
+	<select id="queryRechargeTime" resultType="com.yuntu.sale.capital.po.ExtractPo">
+		SELECT
+		te.id,te.enterprise_id,te.bank_card_id,
+		te.extract_money,te.rate,te.rate_money,
+		te.actual_money,te.status,te.voucher,
+		te.reason,te.create_id,te.create_time,
+		te.audit_id,te.audit_time,
+		ie.name
+		FROM t_extract te LEFT JOIN info_enterprise ie on te.enterprise_id = ie.id
+		<where>
+			1 = 1
+			<if test="enterpriseId != null and enterpriseId != ''">
+				AND te.enterprise_id = #{enterpriseId}
+			</if>
+			<if test="start != null and start != '' and end != null and end != '' ">
+				AND te.create_time BETWEEN #{start} AND #{end}
+			</if>
+			<if test="state != null and state != '' or state == 0">
+				AND te.status = #{state}
+			</if>
+		</where>
+		ORDER BY te.create_time DESC
+	</select>
+
+	<!-- 保存 -->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.capital.po.ExtractPo">
+		INSERT INTO t_extract(
+		<include refid="queryColumns" />
+		) VALUES (
+		#{id},
+		#{enterpriseId},
+		#{bankCardId},
+		#{extractMoney},
+		#{rate},
+		#{rateMoney},
+		#{actualMoney},
+		#{status},
+		#{voucher},
+		#{reason},
+		#{createId},
+		#{createTime},
+		#{auditId},
+		#{auditTime}
+		)
+	</insert>
+
+	<!-- 修改 -->
+	<update id="save" parameterType="com.yuntu.sale.capital.po.ExtractPo">
+		UPDATE
+		t_extract
+		SET
+		enterprise_id = #{enterpriseId},
+		bank_card_id = #{bankCardId},
+		extract_money = #{extractMoney},
+		rate = #{rate},
+		rate_money = #{rateMoney},
+		actual_money = #{actualMoney},
+		status = #{status},
+		voucher = #{voucher},
+		reason = #{reason},
+		create_id = #{createId},
+		create_time = #{createTime},
+		audit_id = #{auditId},
+		audit_time = #{auditTime}
+		WHERE
+		id = #{id}
+	</update>
+	
+	<!-- 查询某企业的累计提现金额 -->
+    <select id="queryByDate" resultType="com.yuntu.sale.capital.po.ExtractPo">
+        SELECT
+            <include refid="querySumColumns" />
+        FROM t_extract
+        WHERE enterprise_id = #{enterpriseId} 
+        AND audit_time >= #{startDate} 
+        AND audit_time &lt; #{endDate} 
+        AND status = 1 
+    </select>
+    
+</mapper>

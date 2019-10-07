@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.manage.dao.function.FuncMenuDao">
+
+	<sql id="queryColumns">
+		id, 
+		module_id, 
+		name,
+		icon, 
+		url, 
+		description, 
+		is_delete, 
+		sort_no, 
+		create_id,  
+		create_time, 
+		update_id, 
+		update_time  
+	</sql>
+	
+	<!-- 通过所属模块Id获取 -->
+	<select id="queryByModule" parameterType="long" resultType="com.yuntu.sale.base.po.function.FuncMenu">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM func_menu 
+		WHERE module_id=#{moduleId} 
+		AND is_delete=0 
+		AND is_distribution=1 
+		ORDER BY sort_no 
+	</select>
+	
+	<!-- 通过Id查询 -->
+	<select id="queryById" parameterType="long" resultType="com.yuntu.sale.base.po.function.FuncMenu">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM func_menu 
+		WHERE id=#{id} 
+	</select>
+
+	<!-- 保存 -->
+	<insert id="insert" parameterType="com.yuntu.sale.base.po.function.FuncMenu">
+		INSERT INTO func_menu 
+			(module_id, name, icon, url, description, is_delete, sort_no, create_id, create_time, update_id, update_time,is_distribution) 
+		VALUES (
+			#{moduleId}, #{name}, #{icon}, #{url}, #{description}, #{isDelete}, #{sortNo}, 
+			#{createId}, #{createTime}, #{updateId}, #{updateTime},#{isDistribution}
+		)
+	</insert>
+	
+	<!-- 修改 -->
+	<update id="update" parameterType="com.yuntu.sale.base.po.function.FuncMenu">
+		UPDATE func_menu SET 
+			name=#{name},
+			icon=#{icon}, 
+			url=#{url},  
+			description=#{description}, 
+			update_id=#{updateId}, 
+			update_time=#{updateTime}
+		WHERE id=#{id} 
+	</update>
+
+	<!-- 删除 -->
+	<delete id="delete" parameterType="long">
+		DELETE FROM func_menu 
+		WHERE id=#{id} 
+	</delete>
+	
+</mapper>

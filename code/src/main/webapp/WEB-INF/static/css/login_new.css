@@ -1,0 +1,61 @@
+*{ margin:0; padding:0;}
+body{font: 12px/1.5 \5FAE\8F6F\96C5\9ED1,tahoma,arial,\5b8b\4f53;background:#fff;color:#233244;}
+ul,li{ list-style:none;}
+input,button,textarea,select,optgroup,option{font-family:inherit;font-size:inherit;font-style:inherit;font-weight:inherit}
+.fl{float:left;}
+.fr{float:right;}
+a{text-decoration: none;}
+input::-webkit-input-placeholder, textarea::-webkit-input-placeholder {color: #b2b2b2;}
+　　input:-moz-placeholder, textarea:-moz-placeholder {color:#b2b2b2;}
+　　input::-moz-placeholder, textarea::-moz-placeholder {color:#b2b2b2;}
+　　input:-ms-input-placeholder, textarea:-ms-input-placeholder {color:#b2b2b2;}
+.clearfix{ clear: both;overflow: hidden;zoom:1;}
+input:focus{outline: none;}
+.content{ width:1200px; margin:0 auto;}
+.top{height:66px;font-size: 16px; padding:10px 160px;}
+.top .logo {height:66px;}
+.top .logo img{margin-right:20px;}
+.top .logo span{ line-height: 34px; padding-top:32px; height:34px;}
+.top .serve{line-height: 34px; padding-top:18px; height:34px; text-align: right;}
+.top .serve li{display: inline-block;padding:0 10px; }
+.top .serve li:last-child{background: url("../images/login/tel.png") no-repeat right center; padding-right: 54px;}
+.login{ height:443px;background: url("../images/login/banner.jpg") no-repeat center top;  padding-top: 115px; }
+.login1{ height:496px;background: url("../images/login/banner1.jpg") no-repeat center top;  padding-top: 90px; }
+.login .logbox{width:376px;height:314px; margin-left:823px;    background: #fff; }
+.login1 .logbox{width:300px;height:360px; margin-left:900px;    background: rgba(0,0,0,.5); border-radius: 12px; }
+.login .logbox .log-cont{ padding:30px 52px; position: relative;}
+.login1 .logbox .log-cont{ padding:26px 30px;}
+.login .logbox .log-cont .log-title{color:#239edd;font-size: 20px; line-height: 24px; margin-bottom: 20px; text-align: center; }
+.login1 .logbox .log-cont .log-title{color:#fff;font-size: 20px; line-height: 24px; margin-bottom: 26px; text-align: center;}
+.login1 .logbox .log-cont .pr{margin-bottom: 36px;  height:26px; position: relative; }
+.login1 .logbox .log-cont .pr .tip.error{top: 26px;   position: absolute; color: #fb7171; }
+.login1 .logbox .log-cont .pr .tip{top: 26px;left:80px;line-height: 24px;   position: absolute; color: #45b6af; }
+.login1 .logbox .log-cont .pr .yzm{border-radius: 3px;width:80px;}
+.login1 .logbox .log-cont .pr .yzm img{max-width: 100%;}
+.login1 .logbox .log-cont .pr span{float:left; margin-right:20px; width:60px;line-height: 26px; color:#fff;font-size: 18px;}
+.login .logbox .log-cont .log-in{width:270px; height:32px; padding-left:40px;margin-bottom: 24px; border:1px solid #ccc; }
+.login1 .logbox .log-cont .log-in{width:138px; height:24px; padding:0 10px;border:1px solid #ccc; color:#626262; line-height: 24px; float:left; border-radius: 3px;}
+.login .logbox .log-cont .log-in.user{background: url("../images/login/icon_user.png") no-repeat 14px 8px;}
+.login .logbox .log-cont .log-in.pass{background: url("../images/login/icon_pass.png") no-repeat 14px 8px;}
+.login .logbox .log-cont .log-yz{width:140px; height:32px; padding-left:20px;margin-bottom: 24px; border:1px solid #ccc; margin-right:12px;}
+.login1 .logbox .log-cont .log-yz{width:50px; height:24px; line-height: 24px; padding:0 10px;margin-bottom: 36px; border:1px solid #ccc; margin-right:4px;border-radius: 3px;}
+.log-btn{ height:36px;line-height: 36px;color:#fff;font-size: 16px;text-align: center; background: #239edd; margin-top: 10px}
+.log-btn a{color:#fff;display: block;}
+.log-btn1{ height:30px;line-height: 30px;width:100px;border-radius:3px;color:#fff;font-size: 16px;text-align: center; background: rgba(35,158,221,.8); margin:0 auto 26px;}
+.log-btn1 a{color:#fff;display: block;}
+.login1 .rem{color:#fff; margin-bottom: 26px;}
+.ace {  width: 22px;  height: 22px;  cursor: pointer;float:left; margin:0px;padding:0;  }
+.lbl{float:left;line-height: 20px; margin-left:6px; font-size: 16px; }
+.log-content{ height:170px;}
+.index_cont{text-align: center; padding:60px 0 80px;}
+.index-tit{ font-size: 22px;}
+.index-intro{color:#626262;  line-height:24px; margin:20px 0 40px; font-size: 16px;}
+
+.cp li{float:left; width:33.3333%;font-size: 18px; line-height: 24px;}
+.cp li img{margin-bottom: 20px;width:126px; height:126px;}
+.bottom{ height: 150px; text-align: center;font-size: 16px;color:#fff; line-height: 150px; background: #239ddd;}
+
+.login .logbox .log-cont .tip{bottom: 70px;line-height: 24px;   position: absolute; color: #45b6af;  width:270px; text-align: center;}
+.login .logbox .log-cont .tip.error{color: #fb7171;  }
+.dtm{width:110px; height:32px; line-height: 32px; text-align: center; padding:0 10px;margin-bottom: 36px; border:none; margin-right:4px;border-radius: 3px; background: #239edd; color:#fff; cursor: pointer;}
+.dtm1{  background: #ccc; color:#fff; cursor:none;}

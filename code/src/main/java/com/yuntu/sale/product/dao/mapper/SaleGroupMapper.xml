@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.product.dao.SaleGroupDao">
+    
+	<sql id="saleGroupColumns">
+		a.id AS "id",
+		a.enterprise_id AS "enterpriseId",
+		a.name AS "name",
+		a.user_number AS "userNumber",
+		a.product_number AS "productNumber",
+		a.is_delete AS "isDelete",
+		a.create_id AS "createId",
+		a.create_time AS "createTime",
+		a.update_id AS "updateId",
+		a.update_time AS "updateTime"
+	</sql>
+	
+	<!-- 通过Id查询 -->
+	<select id="queryById" resultType="com.yuntu.sale.product.po.SaleGroup">
+		SELECT
+		<include refid="saleGroupColumns"></include>
+		FROM t_sale_group a
+		WHERE id = #{id}
+	</select>
+
+	<!-- 通过名称查询 -->
+	<select id="getName" resultType="com.yuntu.sale.product.po.SaleGroup">
+		SELECT
+		<include refid="saleGroupColumns"></include>
+		FROM t_sale_group a
+		WHERE a.is_delete = 0 AND a.name = #{name} AND a.enterprise_id = #{enterpriseId}
+	</select>
+
+	<!-- 通过商品组名称查询 -->
+	<select id="queryByName" resultType="com.yuntu.sale.product.po.SaleGroup">
+		SELECT
+		<include refid="saleGroupColumns"></include>,
+		en.name AS "enterpriseName"
+		FROM t_sale_group a
+		LEFT JOIN info_enterprise en on a.enterprise_id = en.id
+		<where>
+			a.is_delete = 0
+			<if test="enterpriseId != null and enterpriseId != ''">
+				AND a.enterprise_id = #{enterpriseId}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name like CONCAT('%', #{name}, '%')
+			</if>
+		</where>
+		ORDER BY a.create_time DESC
+	</select>
+
+	<!-- 保存 -->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.product.po.SaleGroup">
+		INSERT INTO t_sale_group(
+			id,
+			enterprise_id,
+			name,
+			user_number,
+			product_number,
+			is_delete,
+			create_id,
+			create_time,
+			update_id,
+			update_time
+		) VALUES (
+			#{id},
+			#{enterpriseId},
+			#{name},
+			#{userNumber},
+			#{productNumber},
+			#{isDelete},
+			#{createId},
+			#{createTime},
+			#{updateId},
+			#{updateTime}
+		)
+	</insert>
+
+
+	<!-- 修改 -->
+	<update id="update" parameterType="com.yuntu.sale.product.po.SaleGroup">
+		UPDATE t_sale_group SET
+			name = #{name},
+			user_number = #{userNumber},
+			product_number = #{productNumber},
+			update_id = #{updateId},
+			update_time = #{updateTime}
+		WHERE id = #{id}
+	</update>
+
+	<!-- 删除 -->
+	<update id="delete" parameterType="Long">
+		UPDATE
+		t_sale_group
+		SET
+		is_delete = 1
+		WHERE
+		id = #{id}
+	</update>
+
+</mapper>

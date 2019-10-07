@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.manage.dao.user.InfoUserButtonDao">
+
+	<sql id="queryColumns">
+		id, 
+		enterprise_id, 
+		user_id, 
+		module_id, 
+		menu_id, 
+		action_id, 
+		button_id, 
+		is_delete, 
+		sort_no, 
+		create_id, 
+		create_time, 
+		update_id, 
+		update_time  
+	</sql>
+	
+	<!-- 通过用户Id查询 -->
+	<select id="queryByUser" parameterType="hashmap" resultType="com.yuntu.sale.base.po.user.InfoUserButton">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM info_user_button 
+		WHERE user_id=#{userId} 
+		AND action_id=#{actionId} 
+		AND is_delete=0 
+		ORDER BY sort_no 
+	</select>
+	
+	<!-- 通过Id查询 -->
+	<select id="queryById" parameterType="long" resultType="com.yuntu.sale.base.po.user.InfoUserButton">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM info_user_button 
+		WHERE id=#{id} 
+	</select>
+
+	<!-- 保存 -->
+	<insert id="insert" parameterType="com.yuntu.sale.base.po.user.InfoUserButton">
+		INSERT INTO info_user_button 
+			(enterprise_id, user_id, module_id, menu_id, action_id, button_id, is_delete, sort_no, create_id, create_time, update_id, update_time) 
+		VALUES (
+			#{enterpriseId}, #{userId}, #{moduleId}, #{menuId}, #{actionId}, #{buttonId}, #{isDelete}, #{sortNo}, 
+			#{createId}, #{createTime}, #{updateId}, #{updateTime}
+		)
+	</insert>
+	
+	<!-- 修改 -->
+	<update id="update" parameterType="com.yuntu.sale.base.po.user.InfoUserButton">
+		UPDATE info_user_button SET 
+			is_delete=#{isDelete}, 
+			update_id=#{updateId}, 
+			update_time=#{updateTime}
+		WHERE id=#{id} 
+	</update>
+	
+	<!-- 删除用户下的所有按钮 -->
+	<update id="deleteByUser" parameterType="long">
+		DELETE FROM info_user_button WHERE user_id=#{userId} 
+	</update>
+	
+	<!-- 删除用户下特定功能 -->
+	<delete id="delete" parameterType="hashmap">
+		DELETE FROM info_user_button WHERE user_id=#{userId} and button_id=#{buttonId}
+	</delete>
+	
+	<!-- 通过Id删除 -->
+	<delete id="deleteById" parameterType="long">
+		DELETE FROM info_user_button WHERE id=#{id} 
+	</delete>
+	
+	<!-- 通过用户Id + actionId查询 -->
+	<select id="queryByUserIdAndButtonId" parameterType="hashmap" resultType="com.yuntu.sale.base.po.user.InfoUserButton">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM info_user_action 
+		WHERE user_id=#{userId} 
+		AND button_id=#{buttonId} 
+	</select>
+	
+</mapper>

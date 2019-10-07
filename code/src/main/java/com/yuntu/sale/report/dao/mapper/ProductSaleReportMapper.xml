@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.report.dao.ProductSaleReportDao">
+
+    <!-- 定义“商品”信息 -->
+	<sql id="queryProductColumns">
+		sp.id AS productId, 
+        sp.name AS productName,
+        CASE 
+            WHEN sp.category_id=1 THEN '常规代理' 
+            WHEN sp.category_id=2 THEN '时段包票'
+            WHEN sp.category_id=3 THEN '第三方票务'
+            ELSE '其它'
+        END AS productCategory  
+	</sql>
+	
+	<!-- 定义“订单销售”信息 -->
+    <sql id="queryOrderSaleColumns">
+        count(*) AS ordersNum, 
+        IFNULL(SUM(num), 0) AS saleNum, 
+        IFNULL(SUM(price), 0) AS saleMoney
+    </sql>
+    
+    <!-- 定义“订单消费”信息 -->
+    <sql id="queryOrderConsumeColumns">
+        IFNULL(SUM(c.printnum), 0) AS consumeNum, 
+        IFNULL(SUM(c.price), 0) AS consumeMoney
+    </sql>
+    
+    <!-- 定义“订单退款”信息 -->
+    <sql id="queryOrderRefundColumns">
+        IFNULL(SUM(eor.num), 0) AS refundNum, 
+        IFNULL(SUM(eor.deduct_price), 0) AS refundDeductMoney,
+        IFNULL(SUM(eor.refund_price), 0) AS refundMoney
+    </sql>
+    
+    
+    <!-- 查询商品 -->
+    <select id="queryMyProduct" resultType="com.yuntu.sale.report.vo.SimpleProductVo">
+        SELECT 
+            <include refid="queryProductColumns"></include>
+        FROM t_enterprise_product ep 
+		JOIN t_supplier_product sp ON ep.product_id = sp.id
+		JOIN t_product_category pc ON sp.category_id = pc.id 
+		WHERE ep.child_id = #{enterpriseId} 
+		<if test="productName != null and productName != ''">
+             AND sp.name like CONCAT('%', #{productName}, '%') 
+        </if>
+        <if test="productCategoryId != null and productCategoryId != ''">
+             AND sp.category_id  = #{productCategoryId} 
+		</if>
+    </select>
+    
+    <!-- 查询销售数据 -->
+    <select id="queryOrderSaleData" resultType="com.yuntu.sale.report.vo.ProductSaleDataVo">
+        SELECT 
+            sp.name AS productName, 
+            CASE 
+	            WHEN sp.category_id=1 THEN '常规代理' 
+	            WHEN sp.category_id=2 THEN '时段包票'
+	            WHEN sp.category_id=3 THEN '第三方票务'
+	            ELSE '其它'
+            END AS productCategory,
+            eo.fx_price AS buyPrice, 
+            count(1) AS ordersNum, 
+            SUM(eo.num) AS saleNum, 
+            IFNULL(SUM(oc.printnum), 0) AS consumeNum, 
+            IFNULL(SUM(r.num), 0) AS refundNum,
+			SUM(eo.price) AS saleMoney, 
+	        (eo.fx_price * IFNULL(SUM(oc.printnum), 0)) AS consumeMoney, 
+	        IFNULL(SUM(eor.deduct_price), 0) AS refundDeductMoney, 
+            IFNULL(SUM(eor.refund_price), 0) AS refundMoney
+        FROM t_enterprise_orders eo
+        LEFT JOIN t_orders_consume oc on eo.orders_id = oc.orders_id 
+		LEFT JOIN t_enterprise_orders_refund eor on eo.orders_id = eor.orders_id 
+		LEFT JOIN t_orders_refund r on eo.orders_id = r.orders_id and r.status = 1 
+		LEFT JOIN t_supplier_product sp on eo.sproduct_id = sp.id 
+		WHERE eo.parent_id = #{enterpriseId} 
+            AND eo.status > 2 
+        <if test="productName != null and productName != ''">
+            AND sp.name like CONCAT('%', #{productName}, '%')
+        </if>
+        <if test="productCategoryId != null and productCategoryId != ''">
+            AND sp.category_id = #{productCategoryId} 
+        </if>
+            AND eo.created_at >= UNIX_TIMESTAMP(#{startDate}) 
+            AND eo.created_at &lt; UNIX_TIMESTAMP(#{endDate}) 
+        GROUP BY productName, eo.fx_price
+    </select>
+
+    <!-- 查询消费数据 -->
+    <select id="queryOrderConsumeData" resultType="com.yuntu.sale.report.vo.ProductSaleDataVo">
+        SELECT 
+            <include refid="queryOrderConsumeColumns"></include>
+        FROM t_orders_consume c 
+        JOIN t_enterprise_orders eo ON c.orders_id = eo.orders_id 
+        WHERE c.sproduct_id = #{productId} 
+        AND eo.parent_id = #{enterpriseId} 
+        AND c.printtim >= UNIX_TIMESTAMP(#{startDate}) 
+        AND c.printtim &lt; UNIX_TIMESTAMP(#{endDate})
+    </select>
+    
+    <!-- 查询退款数据 -->
+    <select id="queryOrderRefundData" resultType="com.yuntu.sale.report.vo.ProductSaleDataVo">
+         SELECT 
+            <include refid="queryOrderRefundColumns"></include>
+        FROM t_enterprise_orders_refund eor 
+        JOIN t_orders_refund r ON eor.refund_id = r.id 
+        WHERE eor.child_id = #{enterpriseId} 
+        AND eor.sproduct_id = #{productId} 
+        AND r.status = 1 
+        AND r.audit_time >= UNIX_TIMESTAMP(#{startDate}) 
+        AND r.audit_time &lt; UNIX_TIMESTAMP(#{endDate}) 
+    </select>
+    
+    
+</mapper>

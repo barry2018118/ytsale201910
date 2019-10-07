@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.info.dao.ScenicDao">
+
+    <!-- 定义要查询的列 -->
+	<sql id="queryColumns">
+		id AS "id",
+		name AS "name",
+		address AS "address",
+		level AS "level",
+		is_delete AS "isDelete",
+		city_id AS "cityId",
+		tel AS "tel",
+		pic AS "pic",
+		province_id AS "provinceId",
+		sort_no AS "sortNo",
+		shop_no AS "shopNo"
+	</sql>
+
+	<!-- 通过商品类别（模糊）查询 -->
+	<select id="queryByName" parameterType="java.lang.String" resultType="com.yuntu.sale.info.po.InfoScenicPo">
+		SELECT
+		<include refid="queryColumns"></include>
+		FROM info_shop
+		<where>
+			is_delete = 0
+			<if test="name != null and name != ''">
+				AND name like CONCAT('%', #{name}, '%')
+			</if>
+		</where>
+		ORDER BY sort_no
+	</select>
+
+	<!-- 通过Id查询 -->
+	<select id="queryById" resultType="com.yuntu.sale.info.po.InfoScenicPo">
+		SELECT
+		<include refid="queryColumns"></include>
+		FROM info_shop
+		WHERE id = #{id}
+	</select>
+
+	<!-- 通过Id查询 -->
+	<select id="queryByUniqueName" resultType="com.yuntu.sale.info.po.InfoScenicPo">
+		SELECT
+		<include refid="queryColumns"></include>
+		FROM info_shop
+		WHERE name = #{name}
+	</select>
+
+	<!-- 保存 -->
+
+	<insert id="insert" parameterType="com.yuntu.sale.info.po.InfoScenicPo" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO info_shop
+		(name, address,level,tel,pic,province_id,city_id,is_delete,sort_no,shop_no)
+		VALUES (
+		#{name}, #{address}, #{level},#{tel},#{pic},#{provinceId},#{cityId},#{isDelete}, #{sortNo} ,#{shopNo}
+		)
+	</insert>
+
+
+	<!-- 修改 -->
+	<update id="update" parameterType="com.yuntu.sale.info.po.InfoScenicPo">
+		UPDATE
+		info_shop
+		SET
+		name = #{name},
+		address=#{address},
+		level=#{level},
+		tel=#{tel},
+		province_id=#{provinceId},
+		city_id=#{cityId}
+		WHERE
+		id = #{id}
+	</update>
+
+	<!-- 删除 -->
+	<update id="delete" parameterType="Long">
+		UPDATE
+		info_shop
+		SET
+		is_delete = 1
+		WHERE
+		id = #{id}
+	</update>
+
+
+</mapper>

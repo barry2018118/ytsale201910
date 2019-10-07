@@ -1,0 +1,31 @@
+银行卡管理-新建
+        数据变化：   （1）t_enterprise_bank_card   增加一条记录
+--------------------------------------------------------------------------------
+充值
+        数据变化：   （1）t_recharge   增加一条记录
+                              （2）t_enterprise_account_log   增加一条记录
+                    child_id：               当前登录用户所属的企业Id、
+                    parent_id：            空  
+                    action_type：       1    （select * from info_action_type）
+                    action_id：           t_recharge表刚才插入的数据Id
+                    captial_type：    1    （0： 预收款、1：平台资金）
+                    terminal：              PC  
+ --------------------------------------------------------------------------------               
+提现
+        数据变化：   （1）t_recharge   增加一条记录
+                                          费率   rate：                         0.0
+                           费率扣除金额   rate_money：          0.0
+             审核状态（0：待审核）status：                   0
+--------------------------------------------------------------------------------             
+提现审核（平台管理员功能）
+        数据变化：   （1）t_recharge    修改提现数据
+                              （2）t_enterprise_account_log    增加一条记录
+--------------------------------------------------------------------------------
+预收款设置
+        数据变化：   （1）t_enterprise_storage_log    增加一条记录
+                              （2）t_enterprise_storage_money  修改记录
+                                                通过 parent_id + child_id 查找出唯一记录，修改：storage_money 的数值
+                              （3） t_enterprise_account_log   增加一条记录
+                                        资金变动方式      captial_type： 0  （预收款）
+
+                                                                               

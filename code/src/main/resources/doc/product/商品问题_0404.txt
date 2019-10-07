@@ -1,0 +1,14 @@
+商品搜索，涉及数据表：t_supplier_product(sp), t_enterprise_product(ep)
+	商品名称：	sp.name
+	商品编号：	sp.no
+	商品类别：	sp.category_id
+	商品状态：	sp.status
+	商品来源：	ep.third_platform_id is NULL	（先用这个实现，后面可能会增加字段，我跟北京同事确认一下）
+		（系统内商品：third_platform_id is NULL、	第三方商品：third_platform_id not NULL）
+	商品归属：	ep.is_supplier
+		（自主商品：is_supplier = 1、	分销商品：is_supplier = 0）
+		
+注意点：
+	1. 新建商品时，分别在sp表、ep表中各插入一条数据。
+	2. 分销商品时，通过分销组三张表，向ep表中插入数据。
+	3. 商品列表查询，且 ep join sp on ep.product_id = sp.id

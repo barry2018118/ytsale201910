@@ -1,0 +1,52 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/layouts/common/taglibs.jsp"%>
+
+<link rel="stylesheet" href="${cssPath }/bootstrap/datepicker.css" type="text/css"></link>
+<script type="text/javascript" src="${jsPath }/bootstrap-datepicker.js"></script>
+<script type="text/javascript" src="${jsPath }/locales/bootstrap-datepicker.zh-CN.js"></script>
+
+<title>充值--资金列表</title>
+<div class="page-title ">
+	<!--列表上方索引 S-->
+	<h1 class="fl">
+		<span>充值</span>&nbsp;&gt;&nbsp;<span class="dq">资金列表</span>
+	</h1>
+	<!--列表上方索引 E-->
+	<!--列表上方右侧按钮 S-->
+	<div class="fr">
+		<label class="fl" style="line-height:30px; margin-left:10px;">充值时间&nbsp;&nbsp;</label>
+		<input class="form-control fl datepicker" type="text" style="width:180px;" id="starttime" name="starttime" placeholder="开始时间" />
+		<input class="form-control fl datepicker" type="text" style="width:180px;" id="endtime" name="endtime" placeholder="截止时间" />
+		<button class="btn btn-primary fl btn-top" type="submit" id="toSearchUser">
+			<i class="icon-search"></i>搜索
+		</button>
+	</div>
+	<!--列表上方右侧按钮 E-->
+</div>
+
+<!-- 列表 -->
+<div id="user_data_area"></div>
+
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $(".datepicker").datepicker({
+            language: "zh-CN",
+            autoclose: true,//选中之后自动隐藏日期选择框
+            clearBtn: true,//清除按钮
+            todayBtn: true,//今日按钮
+            format: "yyyy-mm-dd"//日期格式，详见 http://bootstrap-datepicker.readthedocs.org/en/release/options.html#format
+        });
+        // 页面初始化完成加载list请求
+        var requestUrl = "${ctx}/capital/platform/money/recharge/list" ;
+        var requestData = {} ;
+        cserpLoadPage(requestUrl, requestData, 'GET', 'user_data_area') ;
+
+        // toSearch按钮绑定事件，点击后执行搜索
+        $("#toSearchUser").click(function() {
+            var requestUrl = "${ctx}/capital/platform/money/recharge/list" ;
+            var requestData = {} ;
+            cserpLoadPage(requestUrl, requestData, 'GET', 'user_data_area') ;
+        }) ;
+    }) ;
+</script>

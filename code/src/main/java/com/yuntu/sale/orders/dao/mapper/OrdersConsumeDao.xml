@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.orders.dao.OrdersConsumeDao">
+    
+	<sql id="ordersConsumeColumns">
+		a.id AS "id",
+		a.orders_id AS "ordersId",
+		a.code_id AS "codeId",
+		a.sproduct_id AS "sproductId",
+		a.product_sortname AS "productSortname",
+		a.enterprise_id AS "enterpriseId",
+		a.shop_id AS "shopId",
+		a.shop_name AS "shopName",
+		a.unit_price AS "unitPrice",
+		a.price AS "price",
+		a.printnum AS "printnum",
+		a.status AS "status",
+		a.tuanname AS "tuanname",
+		a.card_pwd AS "cardPwd",
+		a.isprint AS "isprint",
+		a.printtim AS "printtim",
+		a.operator_uid AS "operatorUid",
+		a.operator AS "operator",
+		a.serial_num AS "serialNum",
+		a.machine_id AS "machineId",
+		FROM_UNIXTIME(a.printtim,'%Y-%m-%d %H:%m:%s') AS "printtimName"
+	</sql>
+	
+	<sql id="ordersConsumeJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="com.yuntu.sale.orders.po.OrdersConsume">
+		SELECT 
+			<include refid="ordersConsumeColumns"/>
+		FROM t_orders_consume a
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.yuntu.sale.orders.po.OrdersConsume">
+		SELECT 
+			<include refid="ordersConsumeColumns"/>
+		FROM t_orders_consume a
+		<include refid="ordersConsumeJoins"/>
+		<where>
+			
+			<if test="id != null and id != ''">
+				AND a.id = #{id}
+			</if>
+			<if test="ordersId != null and ordersId != ''">
+				AND a.orders_id = #{ordersId}
+			</if>
+			<if test="codeId != null and codeId != ''">
+				AND a.code_id = #{codeId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="com.yuntu.sale.orders.po.OrdersConsume">
+		SELECT 
+			<include refid="ordersConsumeColumns"/>
+		FROM t_orders_consume a
+		<include refid="ordersConsumeJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="queryOrderId" resultType="com.yuntu.sale.orders.po.OrdersConsume">
+		SELECT
+		<include refid="ordersConsumeColumns"/>
+		FROM t_orders_consume a
+		WHERE a.orders_id = #{id}
+		order by a.printtim desc
+	</select>
+
+	<select id="queryCodeId" resultType="com.yuntu.sale.orders.po.OrdersConsume">
+		SELECT
+		<include refid="ordersConsumeColumns"/>
+		FROM t_orders_consume a
+		WHERE a.code_id = #{id}
+		order by a.printtim desc
+	</select>
+
+	<insert id="insert">
+		INSERT INTO t_orders_consume(
+			id,
+			orders_id,
+			code_id,
+			sproduct_id,
+			product_sortname,
+			enterprise_id,
+			shop_id,
+			shop_name,
+			unit_price,
+			price,
+			printnum,
+			status,
+			tuanname,
+			card_pwd,
+			isprint,
+			printtim,
+			operator_uid,
+			operator,
+			serial_num,
+			machine_id
+		) VALUES (
+			#{id},
+			#{ordersId},
+			#{codeId},
+			#{sproductId},
+			#{productSortname},
+			#{enterpriseId},
+			#{shopId},
+			#{shopName},
+			#{unitPrice},
+			#{price},
+			#{printnum},
+			#{status},
+			#{tuanname},
+			#{cardPwd},
+			#{isprint},
+			#{printtim},
+			#{operatorUid},
+			#{operator},
+			#{serialNum},
+			#{machineId}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_orders_consume SET 	
+			orders_id = #{ordersId},
+			code_id = #{codeId},
+			sproduct_id = #{sproductId},
+			product_sortname = #{productSortname},
+			enterprise_id = #{enterpriseId},
+			shop_id = #{shopId},
+			shop_name = #{shopName},
+			unit_price = #{unitPrice},
+			price = #{price},
+			printnum = #{printnum},
+			status = #{status},
+			tuanname = #{tuanname},
+			card_pwd = #{cardPwd},
+			isprint = #{isprint},
+			printtim = #{printtim},
+			operator_uid = #{operatorUid},
+			operator = #{operator},
+			serial_num = #{serialNum},
+			machine_id = #{machineId}
+		WHERE id = #{id}
+	</update>
+	
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE t_orders_consume SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+
+</mapper>

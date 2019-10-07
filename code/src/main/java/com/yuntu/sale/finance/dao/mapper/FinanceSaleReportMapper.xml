@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.finance.dao.FinanceSaleReportDao">
+
+	<!-- 查询订单销售数据 -->
+	<select id="querySaleData" resultType="com.yuntu.sale.finance.vo.FinanceSaleDetailsVo">
+		SELECT 
+            eo.orderno AS orderNo, 
+            o.payid AS supplierOrderNo,
+            o.thirdno AS buyerOrderNo, 
+            s.name AS scenicName,
+            sp.id AS productId,
+            sp.name AS productName, 
+            eo.fx_price AS unitPrice, 
+            eo.num AS saleAmount, 
+            eo.price AS saleTotalPrice, 
+            o.customer_name AS customerName, 
+            o.tel AS customerTel, 
+            e.name AS orderUser,
+            SUBSTRING(FROM_UNIXTIME(eo.created_at), 1, 19) AS orderTime
+        FROM t_enterprise_orders eo 
+            LEFT JOIN t_orders o ON eo.orders_id = o.id 
+            LEFT JOIN t_supplier_product sp ON eo.sproduct_id = sp.id 
+            LEFT JOIN info_shop s ON sp.scenic_id = s.id 
+            LEFT JOIN info_enterprise e ON eo.enterprise_id = e.id
+		<where>
+			<if test="childId!=0">
+				eo.enterprise_id = #{childId} 
+			</if>
+			<if test="parentId!=0">
+				AND eo.parent_id = #{parentId} 
+			</if>
+		</where> 
+			AND eo.created_at >= UNIX_TIMESTAMP(#{startDate}) 
+			AND eo.created_at &lt; UNIX_TIMESTAMP(#{endDate}) 
+			AND eo.status > 2 
+		ORDER BY eo.created_at 
+	</select>
+	
+	<!-- 查询订单退款数据 -->
+	<select id="queryRefundData" resultType="com.yuntu.sale.finance.vo.FinanceRefundDetailsVo">
+		SELECT 
+			eo.orderno AS orderNo, 
+            o.payid AS supplierOrderNo,
+            o.thirdno AS buyerOrderNo, 
+            s.name AS scenicName,
+            sp.id AS productId,
+            sp.name AS productName, 
+            eo.fx_price AS unitPrice, 
+            eor.refund_fee AS refundFeePrice,
+            eor.num AS refundAmount, 
+            eor.deduct_price AS refundFeeTotalPrice,
+            eor.refund_price AS returnTotalPrice, 
+            o.customer_name AS customerName, 
+            o.tel AS customerTel, 
+            e.name AS refundUser,
+            SUBSTRING(FROM_UNIXTIME(r.create_time), 1, 19) AS refundTime, 
+            # uo.user_pname AS refundApplyUser, 
+            SUBSTRING(FROM_UNIXTIME(r.audit_time), 1, 19) AS refundApplyTime
+        FROM
+            t_enterprise_orders_refund eor 
+            LEFT JOIN t_orders_refund r ON eor.refund_id = r.id 
+            LEFT JOIN t_enterprise_orders eo ON eor.enterprise_orders_id = eo.id 
+            LEFT JOIN t_orders o ON eo.orders_id = o.id 
+            LEFT JOIN t_supplier_product sp ON eor.sproduct_id = sp.id 
+            LEFT JOIN info_shop s ON sp.scenic_id = s.id 
+            LEFT JOIN info_enterprise e ON eor.child_id = e.id 
+		<where>
+			<if test="childId!=0">
+				eor.child_id = #{childId} 
+			</if>
+			<if test="parentId!=0">
+				AND eor.parent_id = #{parentId} 
+			</if>
+		</where> 
+			AND r.audit_time >= UNIX_TIMESTAMP(#{startDate}) 
+			AND r.audit_time &lt; UNIX_TIMESTAMP(#{endDate}) 
+			AND r.status = 1 
+		ORDER BY r.audit_time
+	</select>
+
+</mapper>

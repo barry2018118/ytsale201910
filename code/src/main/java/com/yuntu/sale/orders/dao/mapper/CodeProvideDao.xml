@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.orders.dao.CodeProvideDao">
+    
+	<sql id="codeProvideColumns">
+		a.id AS "id",
+		a.card_pwd AS "cardPwd",
+		a.status AS "status"
+	</sql>
+	
+	<sql id="codeProvideJoins">
+	</sql>
+
+	<select id="get" resultType="com.yuntu.sale.orders.po.CodeProvide" >
+		SELECT 
+			<include refid="codeProvideColumns"/>
+		FROM t_code_provide a
+		<include refid="codeProvideJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="find" resultType="com.yuntu.sale.orders.po.CodeProvide" >
+		SELECT 
+			<include refid="codeProvideColumns"/>
+		FROM t_code_provide a
+		<include refid="codeProvideJoins"/>
+		WHERE status = 5 LIMIT #{num} FOR UPDATE
+	</select>
+
+	<insert id="save" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.orders.po.CodeProvide">
+		INSERT INTO t_code_provide(
+			id,
+			card_pwd,
+			status
+		) VALUES (
+			#{id},
+			#{cardPwd},
+			#{status}
+		)
+	</insert>
+	
+	<!--5可用、1已使用-->
+	<update id="update">
+		UPDATE t_code_provide SET status = 1 WHERE id = ${id}
+	</update>
+	
+	<update id="begin">
+		begin
+	</update>
+	
+	<update id="commit">
+		commit
+	</update>
+
+    <!--  -->
+    <select id="quertCountByCodeAndStatus5" resultType="int">
+        SELECT 
+            COUNT(1)
+        FROM t_code_provide
+        WHERE card_pwd = #{code} 
+        AND status = 5
+    </select>
+    
+</mapper>

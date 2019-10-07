@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.finance.dao.IEnterpriseFinanceDao">
+
+    <!-- 商户（供应商、分销商）列信息 -->
+	<sql id="queryEnterpriseColumns">
+        e.id, 
+        e.name
+    </sql>
+    
+
+    <!-- 查询我的供应商 -->
+    <select id="queryMySupplier" resultType="com.yuntu.sale.user.po.InfoEnterprise">
+        SELECT 
+            <include refid="queryEnterpriseColumns"></include>
+        FROM t_enterprise_relation er LEFT JOIN info_enterprise e 
+        ON er.parent_id = e.id   
+        <where>
+            er.child_id = #{myId}
+            AND e.is_delete = 0 
+            <if test="name != null and name != ''">
+                AND e.name like CONCAT('%', #{name}, '%') 
+            </if>
+        </where>
+        ORDER BY e.status DESC, e.create_time DESC 
+    </select>
+    
+    <!-- 查询我的分销商 -->
+    <select id="queryMyDistributor" resultType="com.yuntu.sale.user.po.InfoEnterprise">
+        SELECT 
+            <include refid="queryEnterpriseColumns"></include>
+        FROM t_enterprise_relation er LEFT JOIN info_enterprise e 
+        ON er.child_id = e.id
+        <where>
+            er.parent_id = #{myId}
+            AND e.is_delete = 0
+            <if test="name != null and name != ''">
+                AND e.name like CONCAT('%', #{name}, '%') 
+            </if>
+        </where>
+        ORDER BY e.status DESC, e.create_time DESC 
+    </select>
+    
+    <!-- 查询时间范围内的销售订单汇总数据 -->
+    <select id="querySaleOrdersBySummary" resultType="com.yuntu.sale.finance.vo.FinanceSummaryReportVo">
+        SELECT 
+            eo.uproduct_name AS productName, 
+            eo.fx_price AS price, 
+            sum(eo.num) AS saleNum, 
+            IFNULL(sum(oc.printnum), 0) AS consumeNum, 
+            (eo.fx_price * IFNULL(sum(oc.printnum), 0)) AS consumeMoney 
+        FROM t_enterprise_orders eo 
+        LEFT JOIN t_orders_consume oc on eo.orders_id = oc.orders_id 
+        WHERE eo.enterprise_id = #{childId} 
+	        AND eo.parent_id = #{parentId} 
+	        AND eo.created_at >= UNIX_TIMESTAMP(#{startDate}) 
+	        AND eo.created_at &lt;= UNIX_TIMESTAMP(#{endDate}) 
+	        AND eo.status > 2 
+        GROUP BY eo.uproduct_name, eo.fx_price 
+    </select>
+
+    <!-- 查询时间范围内的消费订单汇总数据 -->
+    <select id="queryConsumeOrdersBySummary" resultType="com.yuntu.sale.finance.vo.FinanceSummaryReportVo">
+        SELECT 
+            eo.uproduct_name AS productName, 
+            eo.fx_price AS price, 
+            sum(eo.num) AS saleNum, 
+            sum(oc.printnum) AS consumeNum, 
+            sum(eo.fx_price * oc.printnum) AS consumeMoney 
+        FROM t_orders_consume oc 
+        LEFT JOIN t_enterprise_orders eo ON oc.orders_id = eo.orders_id 
+        WHERE eo.enterprise_id = #{childId} 
+	        AND eo.parent_id = #{parentId} 
+	        AND oc.printtim >= UNIX_TIMESTAMP(#{startDate}) 
+	        AND oc.printtim &lt;= UNIX_TIMESTAMP(#{endDate})
+        GROUP BY eo.uproduct_name, eo.fx_price 
+    </select>
+    
+    <!-- 查询时间范围内的销售订单明细数据 -->
+    <select id="querySaleOrdersByDetails" resultType="com.yuntu.sale.finance.vo.FinanceDetailsReportVo">
+        SELECT 
+			eo.uproduct_name AS productName,
+			eo.orderno AS orderNo,
+			o.tuanname AS orderSoruce,
+			o.payid AS thirdOrderNo, 
+			o.customer_name AS linkman, 
+			o.idcard AS linkmanNo,
+			o.tel AS linkmanPhone,
+			eo.num AS saleNum,
+			eo.fx_price AS price,
+			IFNULL(sum(oc.printnum), 0) AS consumeNum,
+			eo.fx_price * IFNULL(sum(oc.printnum), 0) AS consumePrice,
+			o.enterprise_name AS createEnterprise
+        FROM t_enterprise_orders eo 
+        JOIN t_orders o ON eo.orders_id = o.id 
+        LEFT JOIN t_orders_consume oc ON eo.orders_id = oc.orders_id 
+        WHERE eo.enterprise_id = #{childId} 
+			AND eo.parent_id = #{parentId} 
+			AND eo.status > 2 
+			AND eo.created_at >= UNIX_TIMESTAMP(#{startDate}) 
+			AND eo.created_at &lt;= UNIX_TIMESTAMP(#{endDate}) 
+        GROUP BY eo.orders_id, eo.price 
+    </select>
+    
+    <!-- 查询时间范围内的消费订单明细数据 -->
+    <select id="queryConsumeOrdersByDetails" resultType="com.yuntu.sale.finance.vo.FinanceDetailsReportVo">
+        SELECT 
+            eo.uproduct_name AS productName,
+            eo.orderno AS orderNo,
+            o.tuanname AS orderSoruce,
+            o.payid AS thirdOrderNo, 
+            o.customer_name AS linkman, 
+            o.idcard AS linkmanNo,
+            o.tel AS linkmanPhone,
+            eo.num AS saleNum,
+            eo.fx_price AS price,
+            oc.printnum AS consumeNum,
+            eo.fx_price * oc.printnum AS consumePrice,
+            o.enterprise_name AS createEnterprise 
+        FROM t_orders_consume oc 
+        JOIN t_enterprise_orders eo ON oc.orders_id = eo.orders_id 
+        JOIN t_orders o ON oc.orders_id = o.id
+        WHERE eo.enterprise_id = #{childId} 
+            AND eo.parent_id = #{parentId} 
+            AND oc.printtim >= UNIX_TIMESTAMP(#{startDate}) 
+            AND oc.printtim &lt;= UNIX_TIMESTAMP(#{endDate}) 
+    </select>
+    
+</mapper>

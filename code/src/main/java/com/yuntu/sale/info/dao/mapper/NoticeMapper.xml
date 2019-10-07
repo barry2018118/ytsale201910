@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.info.dao.NoticeDao">
+
+    <!-- 定义要查询的列 -->
+	<sql id="queryColumns">
+		id,
+		notice_type,
+		title,
+		content,
+		is_top,
+		is_delete,
+		sort_no,
+		create_id,
+		create_time,
+		update_id,
+		update_time,
+		enterprise_id
+
+	</sql>
+
+
+	<!--通过商进行模糊查询-->
+   <select id="queryToTitle" parameterType="java.lang.String" resultType="com.yuntu.sale.info.po.NoticeVo">
+       SELECT
+	   ti.id AS "id",
+	   ti.notice_type AS "noticeType",
+	   ti.title AS "title",
+	   ti.is_top AS "isTop",
+	   ti.create_id AS "createId",
+	   ti.create_time AS "createTime",
+	   ti.enterprise_id AS "enterpriseId",
+	   iu.name AS "createName"
+	   FROM  info_notice AS ti
+	   JOIN info_user AS iu ON
+	   iu.id = ti.create_id
+	   <where>
+		   ti.is_delete =0
+		   <if test="title !=null and title != ''">
+              AND ti.title LIKE CONCAT('%',#{title},'%')
+		   </if>
+	   </where>
+	   order by ti.sort_no
+   </select>
+
+	<!--通过商进行模糊查询-->
+	<select id="queryByTitle" parameterType="java.lang.String" resultType="com.yuntu.sale.info.po.NoticePo">
+		SELECT
+		<include refid="queryColumns"></include>
+		FROM  info_notice
+		<where>
+			is_delete =0
+			<if test="title !=null and title != ''">
+				AND title LIKE CONCAT('%',#{title},'%')
+			</if>
+		</where>
+		order by sort_no
+	</select>
+
+	<!-- 通过Id查询 -->
+	<select id="queryById" resultType="com.yuntu.sale.info.po.NoticePo">
+		SELECT
+		<include refid="queryColumns"></include>
+		FROM info_notice
+		WHERE id = #{id}
+	</select>
+
+	<!-- 通过Id查询 -->
+	<select id="queryByTitleName" resultType="com.yuntu.sale.info.po.NoticePo">
+		SELECT
+		<include refid="queryColumns"></include>
+		FROM info_notice
+		WHERE title = #{title}
+	</select>
+
+
+	<insert id="insert" parameterType="com.yuntu.sale.info.po.NoticePo" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO info_notice
+		(notice_type, title,content,is_top,is_delete,sort_no,create_id,create_time,update_id,update_time,enterprise_id)
+		VALUES
+		(#{noticeType}, #{title}, #{content},#{isTop},#{isDelete},#{sortNo},#{createId},#{createTime},#{updateId},#{updateTime},#{enterpriseId}
+		)
+	</insert>
+
+	<!-- 修改 -->
+	<update id="update" parameterType="com.yuntu.sale.info.po.NoticePo">
+		UPDATE
+		info_notice
+		SET
+		notice_type=#{noticeType},
+		title = #{title},
+		content=#{content},
+		is_top=#{isTop},
+		is_delete=#{isDelete},
+		sort_no=#{sortNo},
+		update_id=#{updateId},
+		update_time=#{updateTime},
+		enterprise_id=#{enterpriseId}
+
+		WHERE
+		id = #{id}
+	</update>
+
+	<!-- 删除 -->
+	<update id="delete" parameterType="Long">
+		UPDATE
+		info_notice
+		SET
+		is_delete = 1
+		WHERE
+		id = #{id}
+	</update>
+
+    <!-- 获得指定数量的公告信息 -->
+    <select id="queryByNum" resultType="com.yuntu.sale.info.po.NoticePo">
+        SELECT
+            <include refid="queryColumns"></include>
+        FROM info_notice
+        <where>
+            is_delete =0
+        </where>
+        ORDER BY create_time desc 
+        LIMIT #{num}
+    </select>
+
+</mapper>

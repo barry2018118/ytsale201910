@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.product.dao.SupplierProductDao">
+    
+	<sql id="supplierProductColumns">
+		a.id AS "id",
+		a.no AS "no",
+		a.enterprise_id AS "enterpriseId",
+		a.name AS "name",
+		a.market_price AS "marketPrice",
+		a.limit_price AS "limitPrice",
+		a.scenic_id AS "scenicId",
+		a.category_id AS "categoryId",
+		a.province_id AS "provinceId",
+		a.city_id AS "cityId",
+		a.introduce AS "introduce",
+		a.cost_inside AS "costInside",
+		a.cost_outside AS "costOutside",
+		a.pic AS "pic",
+		a.buy_option AS "buyOption",
+		a.buy_time_hour AS "buyTimeHour",
+		a.buy_time_minute AS "buyTimeMinute",
+		a.buy_use_day AS "buyUseDay",
+		a.buy_use_hour AS "buyUseHour",
+		a.buy_use_minute AS "buyUseMinute",
+		a.buy_min_number AS "buyMinNumber",
+		a.buy_max_number AS "buyMaxNumber",
+		a.play_mode AS "playMode",
+		a.play_date AS "playDate",
+		a.valid_start_date AS "validStartDate",
+		a.valid_end_date AS "validEndDate",
+		a.store_mode AS "storeMode",
+		a.store_num AS "storeNum",
+		a.refund_mode AS "refundMode",
+		a.audit_mode AS "auditMode",
+		a.service_mode AS "serviceMode",
+		a.service_product_cost AS "serviceProductCost",
+		a.service_order_cost AS "serviceOrderCost",
+		a.service_tel AS "serviceTel",
+		a.message_template AS "messageTemplate",
+		a.third_platform_id AS "thirdPlatformId",
+		a.third_platform_no AS "thirdPlatformNo",
+		a.is_realname AS "isRealname",
+		a.status AS "status",
+		a.is_delete AS "isDelete",
+		a.create_id AS "createId",
+		a.create_time AS "createTime",
+		a.update_id AS "updateId",
+		a.update_time AS "updateTime",
+		a.refund_time AS "refundTime",
+		a.refund_after_day AS "refundAfterDay",
+		a.buy_use_after_hour AS "buyUseAfterHour",
+		a.product_info AS "productInfo",
+		a.refund_after_hour AS "refundAfterHour",
+		a.refund_after_minute AS "refundAfterMinute",
+		a.is_must_card AS "isMustCard",
+		a.refund_method AS "refundMethod" 
+	</sql>
+	
+	<!-- 通过Id查询 -->
+	<select id="queryById" resultType="com.yuntu.sale.product.po.SupplierProduct">
+		SELECT
+		<include refid="supplierProductColumns"></include>
+		FROM t_supplier_product a
+		WHERE id = #{id}
+	</select>
+
+	<!-- 通过name查询 -->
+	<select id="queryByName" resultType="com.yuntu.sale.product.po.SupplierProduct">
+		SELECT
+		<include refid="supplierProductColumns"></include>
+		FROM t_supplier_product a
+		WHERE name = #{name} AND is_delete = 0
+	</select>
+
+	<!--检索-->
+	<select id="querySearch" resultType="com.yuntu.sale.product.po.SupplierProductVo" >
+		SELECT
+		ep.id as "id",
+		ep.is_supplier AS "isSupplier",
+		sp.id AS "productId",
+		sp.no AS "no",
+		sp.enterprise_id AS "enterpriseId",
+		sp.name AS "name",
+		en.name AS "enterpriseName",
+		sp.market_price AS "marketPrice",
+		sp.category_id AS "categoryId",
+		sp.status AS "status",
+		sp.third_platform_id AS "thirdPlatformId",
+		sp.valid_start_date AS "starttime",
+		sp.valid_end_date AS "endtime",
+		sp.store_num AS "stronum",
+		sp.update_time AS "updateTime"
+		FROM t_enterprise_product AS ep
+		join t_supplier_product AS sp on ep.product_id=sp.id
+		LEFT JOIN info_enterprise AS en on sp.enterprise_id = en.id
+		<where>
+			sp.is_delete = 0 
+			AND ep.is_delete = 0 
+			AND ep.is_distribution = 1 
+			<if test="enterpriseId != null and enterpriseId != ''">
+				AND ep.child_id = #{enterpriseId}
+			</if>
+			<if test="productNo != null and productNo != ''">
+				AND sp.no  like CONCAT('%', #{productNo}, '%')
+			</if>
+			<if test="productName != null and productName != ''">
+				AND sp.name like CONCAT('%', #{productName}, '%')
+			</if>
+			<if test="productategory != null and productategory != ''">
+				AND sp.category_id = #{productategory}
+			</if>
+			<if test="productStatus != null and productStatus != '' or productStatus == 0">
+				AND sp.status = #{productStatus}
+			</if>
+			<if test="productSource ==  1">
+				AND sp.third_platform_id is NULL
+			</if>
+			<if test="productSource ==  2">
+				AND sp.third_platform_id is not NULL
+			</if>
+			<if test="productAffiliation != null and productAffiliation != '' or productAffiliation == 0">
+				AND ep.is_supplier = #{productAffiliation}
+			</if>
+		</where>
+				ORDER BY sp.create_time DESC, sp.status DESC
+	</select>
+
+
+	<!--检索-->
+	<select id="queryMySearch" resultType="com.yuntu.sale.product.po.SupplierProduct" >
+		SELECT
+		<include refid="supplierProductColumns"></include>
+		FROM t_enterprise_product AS ep
+		join t_supplier_product AS a
+		on ep.product_id= a.id
+		<where>
+			a.is_delete = 0 
+			AND ep.is_delete = 0 
+			AND ep.is_supplier = 0 
+			AND ep.is_distribution = 1 
+			<if test="enterpriseId != null and enterpriseId != ''">
+				AND ep.child_id = #{enterpriseId}
+			</if>
+			<if test="productNo != null and productNo != ''">
+				AND a.no  like CONCAT('%', #{productNo}, '%')
+			</if>
+			<if test="productName != null and productName != ''">
+				AND a.name like CONCAT('%', #{productName}, '%')
+			</if>
+		</where>
+		ORDER BY a.create_time DESC, a.status DESC
+	</select>
+
+	<!-- 保存 -->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.product.po.SupplierProduct">
+		INSERT INTO t_supplier_product(
+			id,
+			no,
+			enterprise_id,
+			name,
+			market_price,
+			limit_price ,
+			scenic_id,
+			category_id,
+			province_id,
+			city_id,
+			introduce,
+			cost_inside,
+			cost_outside,
+			pic,
+			buy_option,
+			buy_time_hour,
+			buy_time_minute,
+			buy_use_day,
+			buy_use_hour,
+			buy_use_minute,
+			buy_min_number,
+			buy_max_number,
+			play_mode,
+			play_date,
+			valid_start_date,
+			valid_end_date,
+			store_num ,
+			store_mode,
+			refund_mode,
+			audit_mode,
+			service_mode,
+			service_product_cost,
+			service_order_cost,
+			service_tel,
+			message_template,
+			third_platform_id,
+			third_platform_no,
+			is_realname ,
+			status,
+			is_delete,
+			create_id,
+			create_time,
+			update_id,
+			update_time,
+			refund_time,
+			refund_after_day,
+			buy_use_after_hour,
+			product_info,
+			refund_after_hour,
+			refund_after_minute,
+			is_must_card, 
+			refund_method 
+		) VALUES (
+			#{id},
+			#{no},
+			#{enterpriseId},
+			#{name},
+			#{marketPrice},
+			#{limitPrice},
+			#{scenicId},
+			#{categoryId},
+			#{provinceId},
+			#{cityId},
+			#{introduce},
+			#{costInside},
+			#{costOutside},
+			#{pic},
+			#{buyOption},
+			#{buyTimeHour},
+			#{buyTimeMinute},
+			#{buyUseDay},
+			#{buyUseHour},
+			#{buyUseMinute},
+			#{buyMinNumber},
+			#{buyMaxNumber},
+			#{playMode},
+			#{playDate},
+			#{validStartDate},
+			#{validEndDate},
+			#{storeNum},
+			#{storeMode},
+			#{refundMode},
+			#{auditMode},
+			#{serviceMode},
+			#{serviceProductCost},
+			#{serviceOrderCost},
+			#{serviceTel},
+			#{messageTemplate},
+			#{thirdPlatformId},
+			#{thirdPlatformNo},
+			#{isRealname},
+			#{status},
+			#{isDelete},
+			#{createId},
+			#{createTime},
+			#{updateId},
+			#{updateTime},
+			#{refundTime},
+			#{refundAfterDay},
+			#{buyUseAfterHour},
+			#{productInfo},
+			#{refundAfterHour},
+			#{refundAfterMinute},
+			#{isMustCard}, 
+			#{refundMethod} 
+		)
+	</insert>
+
+	<!-- 修改 -->
+	<update id="update" parameterType="com.yuntu.sale.product.po.SupplierProduct">
+		UPDATE t_supplier_product SET 	
+			name = #{name},
+			market_price = #{marketPrice},
+			limit_price = #{limitPrice} ,
+			scenic_id = #{scenicId},
+			category_id = #{categoryId},
+			province_id = #{provinceId},
+			city_id = #{cityId},
+			introduce = #{introduce},
+			cost_inside = #{costInside},
+			cost_outside = #{costOutside},
+			pic = #{pic},
+			buy_option = #{buyOption},
+			buy_time_hour = #{buyTimeHour},
+			buy_time_minute = #{buyTimeMinute},
+			buy_use_day = #{buyUseDay},
+			buy_use_hour = #{buyUseHour},
+			buy_use_minute = #{buyUseMinute},
+			buy_min_number = #{buyMinNumber},
+			buy_max_number = #{buyMaxNumber},
+			play_mode = #{playMode},
+			play_date = #{playDate},
+			valid_start_date = #{validStartDate},
+			valid_end_date = #{validEndDate},
+			store_mode = #{storeMode},
+			store_num = #{storeNum},
+			refund_mode = #{refundMode},
+			audit_mode = #{auditMode},
+			service_mode = #{serviceMode},
+			service_product_cost = #{serviceProductCost},
+			service_order_cost = #{serviceOrderCost},
+			service_tel = #{serviceTel},
+			message_template = #{messageTemplate},
+			third_platform_id = #{thirdPlatformId},
+			third_platform_no = #{thirdPlatformNo},
+			is_realname = #{isRealname},
+			update_id = #{updateId},
+			update_time = #{updateTime},
+			refund_time = #{refundTime},
+			refund_after_day = #{refundAfterDay},
+			buy_use_after_hour = #{buyUseAfterHour},
+			product_info = #{productInfo},
+			refund_after_hour = #{refundAfterHour},
+			refund_after_minute = #{refundAfterMinute},
+			is_must_card = #{isMustCard}, 
+			refund_method = #{refundMethod} 
+		WHERE id = #{id}
+	</update>
+
+
+	<!-- 删除 -->
+	<update id="delete" parameterType="Long">
+		UPDATE
+		t_supplier_product
+		SET
+		is_delete = 1
+		WHERE
+		id = #{id}
+	</update>
+
+	<!-- 状态 -->
+	<update id="status" parameterType="com.yuntu.sale.product.po.SupplierProduct">
+		UPDATE
+		t_supplier_product
+		SET
+		<if test="status == 0">
+			status = 1
+		</if>
+		<if test="status == 1">
+			status = 0
+		</if>
+		WHERE
+		id = #{id}
+	</update>
+	
+</mapper>

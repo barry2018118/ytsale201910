@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.orders.dao.OrdersRefundDao">
+    
+	<sql id="ordersRefundColumns">
+		a.id AS "id",
+		a.enterprise_id AS "enterpriseId",
+		a.orders_id AS "ordersId",
+		a.sproduct_id AS "sproductId",
+		a.num AS "num",
+		a.notes AS "notes",
+		a.status AS "status",
+		a.create_id AS "createId",
+		a.create_time AS "createTime",
+		FROM_UNIXTIME(a.create_time,'%Y-%m-%d %H:%m:%s') AS "createTimetime",
+		a.audit_id AS "auditId",
+		a.audit_time AS "auditTime",
+		FROM_UNIXTIME(a.audit_time,'%Y-%m-%d %H:%m:%s') AS "audiTimetime",
+		a.serial_number AS "serialNumber"
+	</sql>
+	
+	<sql id="ordersRefundJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="com.yuntu.sale.orders.po.OrdersRefund">
+		SELECT 
+			<include refid="ordersRefundColumns"/>
+		FROM t_orders_refund a
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getByOrderAndSerial" resultType="com.yuntu.sale.orders.po.OrdersRefund">
+		SELECT
+		<include refid="ordersRefundColumns"/>
+		FROM t_orders_refund a
+		WHERE a.orders_id = #{orderId} AND a.serial_number = #{serialNumber}
+	</select>
+
+	<select id="findList" resultType="com.yuntu.sale.orders.po.OrdersRefund">
+		SELECT 
+			<include refid="ordersRefundColumns"/>
+		FROM t_orders_refund a
+		<include refid="ordersRefundJoins"/>
+		<where>
+			
+			<if test="enterpriseId != null and enterpriseId != ''">
+				AND a.enterprise_id = #{enterpriseId}
+			</if>
+			<if test="ordersId != null and ordersId != ''">
+				AND a.orders_id = #{ordersId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="queryList" resultType="com.yuntu.sale.orders.vo.OrdersRefundListVo" >
+		SELECT
+		p.name AS "name",
+		o.orderno AS "orderNo",
+		o.unit_price AS "price",
+		i.name AS "audiname",
+		<include refid="ordersRefundColumns"/>
+		FROM t_orders_refund a
+		LEFT JOIN t_supplier_product p ON a.sproduct_id = p.id
+		LEFT JOIN t_orders o ON a.orders_id = o.id
+		LEFT JOIN info_user i ON a.create_id = i.id
+		<where>
+			1 = 1
+			<if test="childId != null and childId != ''">
+				AND a.child_id = #{childId}
+			</if>
+			<if test="productNo != null and productNo != ''">
+				AND o.orderno LIKE CONCAT('%', #{productNo}, '%')
+			</if>
+			<if test="productName != null and productName != ''">
+				AND p.name LIKE CONCAT('%', #{productName}, '%')
+			</if>
+			<if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+				AND a.create_time BETWEEN UNIX_TIMESTAMP(#{startTime}) AND UNIX_TIMESTAMP(#{endTime})
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+		</where>
+	</select>
+	<insert id="save" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.orders.po.OrdersRefund">
+		INSERT INTO t_orders_refund(
+			id,
+			enterprise_id,
+			orders_id,
+			sproduct_id,
+			num,
+			notes,
+			status,
+			create_id,
+			create_time,
+			audit_id,
+			audit_time,
+			serial_number
+		) VALUES (
+			#{id},
+			#{enterpriseId},
+			#{ordersId},
+			#{sproductId},
+			#{num},
+			#{notes},
+			#{status},
+			#{createId},
+			#{createTime},
+			#{auditId},
+			#{auditTime},
+			#{serialNumber}
+		)
+	</insert>
+	
+	<update id="update"  parameterType="com.yuntu.sale.orders.po.OrdersRefund">
+		UPDATE t_orders_refund SET 	
+			enterprise_id = #{enterpriseId},
+			orders_id = #{ordersId},
+			sproduct_id = #{sproductId},
+			num = #{num},
+			notes = #{notes},
+			status = #{status},
+			create_id = #{createId},
+			create_time = #{createTime},
+			audit_id = #{auditId},
+			audit_time = #{auditTime},
+			serial_number = #{serialNumber}
+		WHERE id = #{id}
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE t_orders_refund SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+
+</mapper>

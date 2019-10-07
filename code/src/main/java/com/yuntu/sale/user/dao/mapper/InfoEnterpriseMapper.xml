@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.user.dao.InfoEnterpriseDao">
+
+	<sql id="queryColumns">
+		id,
+		domain,
+		company_type,
+		parent_id,
+		name,
+		contacter_name,
+		contacter_phone,
+		email,
+		address,
+		introduction,
+		logo,
+		banner,
+		customer_phone,
+		platform_name,
+		province,
+		city,
+		status,
+		is_delete,
+		create_id ,
+		create_time ,
+		update_id ,
+		update_time
+	</sql>
+	
+	<sql id="queryEnterpriseColumns">
+        e.id,
+        e.company_type,
+        e.name,
+        e.contacter_name,
+        e.contacter_phone,
+        e.status, 
+        er.create_enterprise AS createEnterprise 
+    </sql>
+
+    <!-- 查询平台运营商 -->
+    <select id="queryOperation" resultType="com.yuntu.sale.user.po.InfoEnterprise">
+        SELECT 
+            <include refid="queryColumns"></include>
+        FROM info_enterprise  
+        <where>
+            is_delete = 0 
+            AND company_type = 1 
+            <if test="name != null and name != ''">
+                AND name like CONCAT('%', #{name}, '%') 
+            </if>
+        </where>
+        ORDER BY status DESC, create_time DESC 
+    </select>
+    
+    <!-- 查询平台商户 -->
+    <select id="queryShop" resultType="com.yuntu.sale.user.po.InfoEnterprise">
+        SELECT 
+            <include refid="queryColumns"></include>
+        FROM info_enterprise  
+        <where>
+            is_delete = 0 
+            <choose>
+                <when test="companyType == 9">
+                    AND company_type in (2, 3)
+                </when>
+                <when test="companyType != 9">
+                    AND company_type = #{companyType} 
+                </when>
+                <otherwise>
+                     AND company_type = #{companyType} 
+                </otherwise>
+            </choose>
+            <if test="name != null and name != ''">
+                AND name like CONCAT('%', #{name}, '%') 
+            </if>
+        </where>
+        ORDER BY status DESC, create_time DESC 
+    </select>
+    
+    <!-- 查询我的商户 （此方法废弃      2018-04-15 modify by snps） -->
+    <select id="queryMyShop" resultType="com.yuntu.sale.user.po.InfoEnterprise">
+        SELECT 
+            <include refid="queryColumns"></include>
+        FROM info_enterprise  
+        <where>
+            is_delete = 0 
+            AND parent_id = #{parentId} 
+            AND company_type = #{companyType} 
+            <if test="name != null and name != ''">
+                AND name like CONCAT('%', #{name}, '%') 
+            </if>
+        </where>
+        ORDER BY status DESC, create_time DESC 
+    </select>
+    
+    <!-- 查询我的供应商 -->
+    <select id="queryMySupplier" resultType="com.yuntu.sale.user.po.InfoEnterprise">
+        SELECT 
+            <include refid="queryEnterpriseColumns"></include>
+        FROM t_enterprise_relation er LEFT JOIN info_enterprise e 
+        ON er.parent_id = e.id   
+        <where>
+            er.child_id = #{myId}
+            AND e.is_delete = 0 
+            <if test="name != null and name != ''">
+                AND e.name like CONCAT('%', #{name}, '%') 
+            </if>
+        </where>
+        ORDER BY e.status DESC, e.create_time DESC 
+    </select>
+    
+    <!-- 查询我的分销商 -->
+    <select id="queryMyDistributor" resultType="com.yuntu.sale.user.po.InfoEnterprise">
+        SELECT 
+            <include refid="queryEnterpriseColumns"></include>
+        FROM t_enterprise_relation er LEFT JOIN info_enterprise e 
+        ON er.child_id = e.id
+        <where>
+            er.parent_id = #{myId}
+            AND e.is_delete = 0
+            <if test="name != null and name != ''">
+                AND e.name like CONCAT('%', #{name}, '%') 
+            </if>
+        </where>
+        ORDER BY e.status DESC, e.create_time DESC 
+    </select>
+
+    <!-- 查询分销组-分销商 -->
+    <select id="querySaleDistributor" resultType="com.yuntu.sale.user.po.InfoEnterprise">
+        SELECT
+        <include refid="queryEnterpriseColumns"></include>
+        FROM t_enterprise_relation er LEFT JOIN info_enterprise e
+        ON er.child_id = e.id
+        <where>
+            er.parent_id = #{parentId}  AND e.is_delete = 0
+            <if test="name != null and name != ''">
+                AND e.name like CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+        ORDER BY e.status DESC, e.create_time DESC
+    </select>
+
+    <!-- 保存 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.user.po.InfoEnterprise">
+        INSERT INTO info_enterprise(
+            id,
+            domain,
+            company_type,
+            parent_id,
+            name,
+            contacter_name,
+            contacter_phone,
+            email,
+            address,
+            introduction,
+            logo,
+            banner,
+            customer_phone,
+            platform_name,
+            province,
+            city,
+            status,
+            is_delete,
+            create_id,
+            create_time,
+            update_id,
+            update_time
+        ) VALUES (
+	        #{id},
+	        #{domain},
+	        #{companyType},
+	        #{parentId},
+	        #{name},
+	        #{contacterName},
+	        #{contacterPhone},
+	        #{email},
+	        #{address},
+	        #{introduction},
+	        #{logo},
+	        #{banner},
+	        #{customerPhone},
+	        #{platformName},
+	        #{province},
+	        #{city},
+	        #{status},
+	        #{isDelete},
+	        #{createId},
+	        #{createTime},
+	        #{updateId},
+	        #{updateTime}
+        )
+    </insert>
+    
+    <!-- 通过Id查询 -->
+    <select id="queryById" resultType="com.yuntu.sale.user.po.InfoEnterprise">
+        SELECT 
+            <include refid="queryColumns" />
+        FROM info_enterprise 
+        WHERE id = #{id}
+    </select>
+    
+    <!-- 通过企业名称查询（唯一） -->
+    <select id="queryByName" resultType="com.yuntu.sale.user.po.InfoEnterprise">
+        SELECT 
+            <include refid="queryColumns" />
+        FROM info_enterprise 
+        WHERE 
+            name = #{name}
+    </select>
+
+    <!-- 通过企业二级域名查询（唯一） -->
+    <select id="queryByDomain" resultType="com.yuntu.sale.user.po.InfoEnterprise">
+        SELECT 
+            <include refid="queryColumns" />
+        FROM info_enterprise 
+        WHERE domain = #{domain}
+    </select>
+
+	<!-- 修改 -->
+	<update id="update" parameterType="com.yuntu.sale.user.po.InfoEnterprise">
+        UPDATE 
+            info_enterprise
+        SET
+            domain = #{domain},
+            name = #{name},
+			domain = #{domain},
+			contacter_name = #{contacterName},
+			contacter_phone = #{contacterPhone},
+			email = #{email},
+			address = #{address},
+			introduction = #{introduction},
+			province = #{province},
+			city = #{city},
+			update_id = #{updateId},
+			update_time = #{updateTime}
+        WHERE 
+            id = #{id}
+	</update>
+
+    <!-- 启用/停用 -->
+    <update id="updateStatus">
+        UPDATE
+            info_enterprise
+        SET
+            status = #{status} 
+        WHERE
+            id = #{id}
+    </update>
+
+	<!-- 删除机构 -->
+	<update id="delete">
+		UPDATE
+            info_enterprise
+		SET
+            is_delete = 1
+		WHERE
+            id = #{id}
+	</update>
+	
+	<!-- 查询可用的下级公司数量 -->
+    <select id="queryChildCount" resultType="int">
+        SELECT 
+            COUNT(*) 
+        FROM info_enterprise 
+        WHERE 
+            parent_id = #{id} 
+        AND is_delete = 0
+        AND status = 1
+    </select>
+    
+    <!-- 修改网站信息 -->
+    <update id="updateWebsiteInfo" parameterType="com.yuntu.sale.user.po.InfoEnterprise">
+        UPDATE 
+            info_enterprise
+        SET
+            logo = #{logo},
+            banner = #{banner},
+            customer_phone = #{customerPhone},
+            platform_name = #{platformName},
+            update_id = #{updateId},
+            update_time = #{updateTime}
+        WHERE 
+            id = #{id}
+    </update>
+
+    <!-- 重置企业主账号 -->
+    <update id="updateEnterpriseAccount">
+        UPDATE 
+            info_user 
+        SET
+            username = #{account} 
+        WHERE 
+            enterprise_id = #{enterpriseId} 
+            AND is_master = 1 
+    </update>
+
+</mapper>

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.product.dao.SaleGroupProductDao">
+    
+	<sql id="saleGroupProductColumns">
+		a.id AS "id",
+		a.group_id AS "groupId",
+		a.create_enterprise_id AS "createEnterpriseId",
+		a.product_id AS "productId",
+		a.is_delete AS "isDelete",
+		a.create_id AS "createId",
+		a.create_time AS "createTime",
+		a.update_id AS "updateId",
+		a.update_time AS "updateTime",
+		a.is_distribution AS "isDistribution" 
+	</sql>
+	
+	<!-- 通过Id查询 -->
+	<select id="queryById" resultType="com.yuntu.sale.product.po.SaleGroupProduct">
+		SELECT
+		<include refid="saleGroupProductColumns"></include>
+		FROM t_sale_group_product a 
+		WHERE id = #{id}
+	</select>
+
+	<!-- 保存 -->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.product.po.SaleGroupProduct">
+		INSERT INTO t_sale_group_product(
+			id,
+			group_id,
+			group_tracks,
+			create_enterprise_id,
+			product_id,
+			is_delete,
+			create_id,
+			create_time,
+			update_id,
+			update_time,
+			is_distribution
+		) VALUES (
+			#{id},
+			#{groupId},
+			#{groupTracks},
+			#{createEnterpriseId},
+			#{productId},
+			#{isDelete},
+			#{createId},
+			#{createTime},
+			#{updateId},
+			#{updateTime},
+			#{isDistribution}
+		)
+	</insert>
+
+	<!-- 修改 -->
+	<update id="update" parameterType="com.yuntu.sale.product.po.SaleGroupProduct">
+		UPDATE t_sale_group_product SET 	
+			group_id = #{groupId},
+			create_enterprise_id = #{createEnterpriseId},
+			product_id = #{productId},
+			update_id = #{updateId},
+			update_time = #{updateTime}
+		WHERE id = #{id}
+	</update>
+
+	<!-- 删除 -->
+	<update id="delete" parameterType="Long">
+		UPDATE
+		t_sale_group_product
+		SET
+		is_delete = 1
+		WHERE
+		id = #{id}
+	</update>
+
+	<!-- 通过分销组分销商列表 -->
+	<select id="querySaleGroupProduct" resultType="com.yuntu.sale.product.po.SaleGroupProductVo">
+		SELECT
+			tsgp.id as "id",
+			tsgp.product_id as "productId",
+			sp.no as "no",
+			sp.name as "name",
+			sp.market_price as "marketPrice", 
+			tsgp.is_distribution AS "isDistribution" 
+		FROM t_sale_group_product AS tsgp
+		JOIN t_supplier_product AS sp ON sp.id=tsgp.product_id
+		WHERE tsgp.is_delete = 0 
+		AND sp.is_delete = 0 
+		AND tsgp.group_id = #{groupId} 
+		AND tsgp.create_enterprise_id = #{createGroupId}
+		<if test="no != null and no != ''">
+			AND sp.no like CONCAT('%', #{no}, '%')
+		</if>
+		<if test="name != null and name != ''">
+			AND sp.name like CONCAT('%', #{name}, '%')
+		</if>
+		ORDER BY tsgp.create_time DESC
+	</select>
+
+	<!-- 通过Id查询 -->
+	<select id="queryOne" resultType="com.yuntu.sale.product.po.SaleGroupProduct">
+		SELECT
+		<include refid="saleGroupProductColumns"></include>
+		FROM t_sale_group_product a
+		WHERE
+		a.is_delete = 0 AND a.group_id = #{groupId} AND a.create_enterprise_id = #{createGroupId} AND a.product_id = #{productId}
+	</select>
+
+	<!-- 通过Id查询 -->
+	<select id="getProductList" resultType="com.yuntu.sale.product.po.SaleGroupProductVo">
+		SELECT
+		tsgp.id as "id",
+		tsgp.product_id as "productId",
+		sp.no as "no",
+		sp.name as "name",
+		sp.market_price as "marketPrice"
+		FROM t_sale_group_product AS tsgp
+		join t_supplier_product AS sp
+		on sp.id=tsgp.product_id
+		WHERE tsgp.is_delete = 0 AND sp.is_delete = 0 AND tsgp.group_id = #{groupId} AND tsgp.create_enterprise_id = #{createGroupId}
+		ORDER BY tsgp.create_time DESC
+	</select>
+
+    <!-- 查询组中已存在的商品 -->
+    <select id="queryIsExistProduct" resultType="com.yuntu.sale.product.po.SaleGroupProduct">
+        SELECT
+            <include refid="saleGroupProductColumns"></include> 
+        FROM t_sale_group_product a 
+        WHERE group_id = #{groupId} 
+        AND is_delete = 0 
+    </select>
+    
+    <!-- 开启分销 -->
+    <update id="updateDescribution">
+        UPDATE 
+            t_sale_group_product 
+        SET 
+            is_distribution = 1 
+        WHERE 
+            group_id = #{groupId} 
+            AND product_id = #{sproductId}
+    </update>
+    
+    <!-- 停止分销 -->
+    <update id="updateStopDescribution">
+        UPDATE 
+            t_sale_group_product 
+        SET 
+            is_distribution = 0 
+        WHERE 
+            group_id = #{groupId} 
+            AND product_id = #{sproductId}
+    </update>
+    
+    <!-- 停止下级分销 -->
+    <update id="deleteChildDescribution">
+        UPDATE 
+            t_sale_group_product 
+        SET 
+            is_delete = 1, 
+            is_distribution = 0 
+        WHERE 
+            product_id = #{sproductId}
+            AND (group_tracks like CONCAT(#{groupTracks}, ',%'))
+    </update>
+
+</mapper>

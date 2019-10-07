@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.product.dao.EnterpriseProductDao">
+    
+    <sql id="enterpriseProductColumns">
+        a.id AS "id",
+        a.enterprise_id as "enterpriseId",
+        a.product_id AS "productId",
+        a.parent_id AS "parentId",
+        a.child_id AS "childId",
+        a.is_supplier AS "isSupplier",
+        a.group_id AS "groupId",
+        a.group_tracks AS "groupTracks",
+        a.user_tracks AS "userTracks",
+        a.is_delete AS "isDelete",
+        a.create_id AS "createId",
+        a.create_time AS "createTime",
+        a.update_id AS "updateId",
+        a.update_time AS "updateTime"
+    </sql>
+
+    <!-- 通过Id查询 -->
+    <select id="queryById" resultType="com.yuntu.sale.product.po.EnterpriseProduct">
+        SELECT
+        <include refid="enterpriseProductColumns"></include>
+        FROM t_enterprise_product a
+        WHERE a.id = #{id}
+    </select>
+
+    <!-- 保存 -->
+    <insert id="save" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.product.po.EnterpriseProduct">
+        INSERT INTO t_enterprise_product(
+            id,
+            enterprise_id,
+            product_id,
+            parent_id,
+            child_id,
+            is_supplier,
+            group_id,
+            group_tracks,
+            user_tracks,
+            is_delete,
+            create_id,
+            create_time,
+            update_id,
+            update_time, 
+            is_distribution
+        ) VALUES (
+            #{id},
+            #{enterpriseId},
+            #{productId},
+            #{parentId},
+            #{childId},
+            #{isSupplier},
+            #{groupId},
+            #{groupTracks},
+            #{userTracks},
+            #{isDelete},
+            #{createId},
+            #{createTime},
+            #{updateId},
+            #{updateTime},
+            #{isDistribution}
+        )
+    </insert>
+
+
+    <!-- 修改 -->
+    <update id="update" parameterType="com.yuntu.sale.product.po.EnterpriseProduct">
+        UPDATE t_enterprise_product SET
+        product_id = #{productId},
+        parent_id = #{parentId},
+        child_id = #{childId},
+        is_supplier = #{isSupplier},
+        group_id = #{groupId},
+        group_tracks = #{groupTracks},
+        user_tracks = #{userTracks},
+        update_id = #{updateId},
+        update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除 -->
+    <update id="delete" parameterType="Long">
+        UPDATE
+        t_enterprise_product
+        SET
+        is_delete = 1
+        WHERE
+        id = #{id}
+    </update>
+
+    <!-- 通过 商户 - 商品 - 分销组 查询 -->
+    <select id="getSearch" resultType="com.yuntu.sale.product.po.EnterpriseProduct">
+        SELECT
+        <include refid="enterpriseProductColumns"></include>
+        FROM t_enterprise_product a
+        WHERE a.product_id = #{productId} AND a.is_delete = 0 AND a.child_id = #{childId} AND a.group_id = #{groupId}
+    </select>
+
+    <!-- 通过 商户 - 商品 - 分销组 查询 -->
+    <select id="queryOne" resultType="com.yuntu.sale.product.po.EnterpriseProduct">
+        SELECT
+        <include refid="enterpriseProductColumns"></include>
+        FROM t_enterprise_product a
+        WHERE a.product_id = #{productId} AND a.child_id = #{childId} AND a.is_delete = 0
+        <if test="parentId != null and parentId != ''">
+            AND a.parent_id = #{parentId}
+        </if>
+    </select>
+
+    <!-- 通过 删除 商户 - 商品 - 分销组 查询 -->
+    <select id="getDelSearch" resultType="com.yuntu.sale.product.po.EnterpriseProduct">
+        SELECT
+        <include refid="enterpriseProductColumns"></include>
+        FROM t_enterprise_product a
+        <where>
+            a.is_delete = 0
+            <if test="productId != null and productId != ''">
+                AND a.product_id = #{productId}
+            </if>
+            <if test="parentId != null and parentId != ''">
+                AND a.parent_id = #{parentId}
+            </if>
+            <if test="childId != null and childId != ''">
+                AND a.child_id = #{childId}
+            </if>
+            <if test="groupId != null and groupId != ''">
+                AND a.group_id = #{groupId}
+            </if>
+        </where>
+    </select>
+
+    <!-- 通过 商户 - 商品 - 分销组 查询 -->
+    <select id="queryByProductId" resultType="Integer">
+        SELECT
+        count(*)
+        FROM t_enterprise_product a
+        WHERE a.product_id = #{productId} AND a.is_delete = 0
+    </select>
+    
+    <!-- 查询商品是否分销 -->
+    <select id="queryProductDistributionNum" resultType="Integer">
+        SELECT
+        count(*)
+        FROM t_enterprise_product a
+        WHERE a.product_id = #{productId} AND a.is_distribution = 1
+    </select>
+
+    <!-- 通过 商户 - 商品 - 分销组 查询 -->
+    <select id="queryByParentId" resultType="Integer">
+        SELECT
+        count(*)
+        FROM t_enterprise_product a
+        WHERE a.parent_id = #{parentId} AND a.is_delete = 0
+    </select>
+    
+    <!-- 修改商品组中商品的分销状态-开启分销 -->
+    <update id="updateDescribution">
+        UPDATE 
+            t_enterprise_product 
+        SET 
+            is_distribution = 1 
+        WHERE 
+            group_id = #{groupId} 
+            AND product_id = #{sproductId}
+    </update>
+    
+     <!-- 修改商品组中商品的分销状态-停止分销 -->
+    <update id="updateStopDescribution">
+        UPDATE 
+            t_enterprise_product 
+        SET 
+            is_distribution = 0 
+        WHERE 
+            product_id = #{sproductId} 
+            AND (group_id = #{groupTracks} OR group_tracks like CONCAT(#{groupTracks}, ',%'))
+    </update>
+    
+</mapper>

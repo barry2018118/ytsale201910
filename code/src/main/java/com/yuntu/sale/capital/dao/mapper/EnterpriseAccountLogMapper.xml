@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.capital.dao.EnterpriseAccountLogDao">
+
+	<sql id="queryColumns">
+		id,
+		child_id, 
+		parent_id, 
+		action_type, 
+		action_id, 
+		capital_type,
+		old_price,
+		price,
+		current_price,
+		create_time,
+		terminal,
+		phone_system,
+		action_desc
+	</sql>
+
+	<!-- 平台资金变动查询 -->
+	<select id="queryByActionType" resultType="com.yuntu.sale.capital.po.EnterpriseAccountLogPo">
+		SELECT
+		<include refid="queryColumns"></include>
+		FROM t_enterprise_account_log
+		<where>
+			1 = 1
+			<if test="actionType != null and actionType != ''">
+				AND action_type = #{actionType}
+			</if>
+			<if test="enterpriseId != null and enterpriseId != ''">
+				AND child_id = #{enterpriseId}
+			</if>
+			<if test="capitalType != null and capitalType != ''">
+				AND capital_type = #{capitalType}
+			</if>
+			<if test="startTime != null and startTime != '' and endTime != null and endTime != '' ">
+				AND create_time BETWEEN #{startTime} AND #{endTime}
+			</if>
+		</where>
+		ORDER BY create_time DESC
+	</select>
+
+	<!-- 通过业务行为类型ID查询 -->
+	<select id="queryAllByEnterpriseId" resultType="com.yuntu.sale.capital.po.EnterpriseAccountLogPo">
+		SELECT
+		<include refid="queryColumns"></include>
+		FROM t_enterprise_account_log
+		<where>
+			child_id = #{enterpriseId} AND action_type IS NOT NULL
+			<if test="capitalType != null and capitalType != '' ">
+				AND capital_type = #{capitalType}
+			</if>
+			<if test="startTime != null and startTime != '' and endTime != null and endTime != '' ">
+				AND create_time BETWEEN #{startTime} AND #{endTime}
+			</if>
+		</where>
+		ORDER BY create_time DESC
+	</select>
+
+	<!-- 通过交易资金列表 -->
+	<select id="queryAllByEnterpriseIdTrans" resultType="com.yuntu.sale.capital.po.EnterpriseAccountLogPo">
+		SELECT
+		<include refid="queryColumns"></include>
+		FROM t_enterprise_account_log
+	    WHERE
+			 action_type IN (3,4)
+			<if test="enterpriseId != null and enterpriseId != '' ">
+				AND child_id = #{enterpriseId}
+			</if>
+			<if test="startTime != null and startTime != '' and endTime != null and endTime != '' ">
+				AND create_time BETWEEN #{startTime} AND #{endTime}
+			</if>
+		ORDER BY create_time DESC
+	</select>
+
+	<!-- 通过ID查询 -->
+	<select id="queryById" resultType="com.yuntu.sale.capital.po.EnterpriseAccountLogPo">
+		SELECT
+		<include refid="queryColumns"></include>
+		FROM t_enterprise_account_log
+		<where>
+			id = #{id}
+		</where>
+	</select>
+
+	<!-- 预存款 查询 -->
+	<select id="query" resultType="com.yuntu.sale.capital.po.EnterpriseAccountLogPo">
+		SELECT
+		<include refid="queryColumns"></include>
+		FROM t_enterprise_account_log
+		ORDER BY create_time DESC
+	</select>
+
+	<!-- 企业id关系 查询 -->
+	<select id="querySearch" resultType="com.yuntu.sale.capital.po.EnterpriseAccountLogPo">
+		SELECT
+		<include refid="queryColumns"></include>
+		FROM t_enterprise_account_log
+		<where>
+			<if test="childId != null and childId != '' and parentId != null and parentId != ''">
+				child_id = #{childId} AND parent_id = #{parentId}
+			</if>
+		</where>
+		ORDER BY create_time DESC
+	</select>
+
+	<!-- 企业子订单 查询 -->
+	<select id="queryOrder" resultType="com.yuntu.sale.capital.po.EnterpriseAccountLogPo">
+		SELECT
+		<include refid="queryColumns"></include>
+		FROM t_enterprise_account_log
+		WHERE  child_id = #{childId}  AND action_type = #{type} AND action_id = #{enterpriseOrdersId}
+		<if test="parentId != null and parentId != '' ">
+			AND parent_id = #{parentId}
+		</if>
+	</select>
+
+	<!-- 新增 -->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.capital.po.EnterpriseAccountLogPo">
+		INSERT INTO t_enterprise_account_log(
+		<include refid="queryColumns" />
+		) VALUES (
+		#{id},
+		#{childId},
+		#{parentId},
+		#{actionType},
+		#{actionId},
+		#{capitalType},
+		#{oldPrice},
+		#{price},
+		#{currentPrice},
+		#{createTime},
+		#{terminal},
+		#{phoneSystem},
+		#{actionDesc}
+		)
+	</insert>
+
+	<!-- 修改 -->
+	<update id="save" parameterType="com.yuntu.sale.capital.po.EnterpriseAccountLogPo">
+		UPDATE
+		t_enterprise_account_log
+		SET
+		child_id = #{childId},
+		parent_id = #{parentId},
+		action_type = #{actionType},
+		action_id = #{actionId},
+		capital_type = #{capitalType},
+		old_price = #{oldPrice},
+		price = #{price},
+		current_price = #{currentPrice},
+		create_time = #{createTime},
+		terminal = #{terminal},
+		phone_system = #{phoneSystem},
+		action_desc = #{actionDesc}
+		WHERE
+		id = #{id}
+	</update>
+
+</mapper>

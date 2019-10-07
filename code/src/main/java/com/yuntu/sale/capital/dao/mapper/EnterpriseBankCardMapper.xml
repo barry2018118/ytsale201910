@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.capital.dao.EnterpriseBankCardDao">
+
+	<sql id="queryColumns">
+		id,
+		enterprise_id,
+		bank,
+		address,
+		card_no,
+		card_master,
+		remark,
+		is_delete,
+		sort_no,
+		create_id,
+		create_time
+	</sql>
+
+	<!-- 通过企业id查询 -->
+	<select id="queryByEnterpriseId" resultType="com.yuntu.sale.capital.po.EnterpriseBankCardPo">
+		SELECT
+		<include refid="queryColumns"></include>
+		FROM t_enterprise_bank_card
+		<where>
+			is_delete = 0 AND enterprise_id = #{enterpriseId}
+		</where>
+		ORDER BY create_time DESC
+	</select>
+
+	<!-- 通过Id查询 -->
+	<select id="queryById" resultType="com.yuntu.sale.capital.po.EnterpriseBankCardPo">
+		SELECT
+		<include refid="queryColumns" />
+		FROM t_enterprise_bank_card
+		WHERE id = #{id}
+	</select>
+
+	<!-- 通过卡号查询 -->
+	<select id="queryCardNo" resultType="com.yuntu.sale.capital.po.EnterpriseBankCardPo">
+		SELECT
+		<include refid="queryColumns" />
+		FROM t_enterprise_bank_card
+		WHERE is_delete = 0 AND card_no = #{cardNo}
+	</select>
+
+	<!-- 检索 -->
+	<select id="queryMyCard" resultType="com.yuntu.sale.capital.po.EnterpriseBankCardPo">
+		SELECT
+		<include refid="queryColumns"></include>
+		FROM t_enterprise_bank_card
+		<where>
+			is_delete = 0 AND enterprise_id = #{enterpriseId}
+			<if test="name != null and name != ''">
+				AND card_no like CONCAT('%', #{name}, '%')
+			</if>
+		</where>
+		ORDER BY create_time DESC
+	</select>
+
+	<!-- 保存 -->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.capital.po.EnterpriseBankCardPo">
+		INSERT INTO t_enterprise_bank_card(
+			id,
+			enterprise_id,
+			bank,
+			address,
+			card_no,
+			card_master,
+			remark,
+			is_delete,
+			sort_no,
+			create_id,
+			create_time
+		) VALUES (
+			#{id},
+			#{enterpriseId},
+			#{bank},
+			#{address},
+			#{cardNo},
+			#{cardMaster},
+			#{remark},
+			#{isDelete},
+			#{sortNo},
+			#{createId},
+			#{createTime}
+		)
+	</insert>
+
+	<!-- 修改 -->
+	<update id="update" parameterType="com.yuntu.sale.capital.po.EnterpriseBankCardPo">
+		UPDATE
+            t_enterprise_bank_card
+		SET
+            bank = #{bank},
+            address = #{address},
+            card_no = #{cardNo},
+            card_master =  #{cardMaster},
+            remark =  #{remark}
+		WHERE
+            id = #{id}
+	</update>
+
+	<!-- 删除银行卡-->
+	<update id="delete">
+		UPDATE
+		t_enterprise_bank_card
+		SET
+		is_delete = 1
+		WHERE
+		id = #{id}
+	</update>
+
+</mapper>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.report.dao.ChildReportDao">
+
+    <!-- 查询分销商销售汇总数据 -->
+    <select id="querySaleData" resultType="com.yuntu.sale.report.vo.ChildSaleDataVo">
+        SELECT 
+            eo.enterprise_id AS childId,
+            e.name AS childName,            
+            SUM(eo.num) AS saleAmount, 
+            SUM(eo.price) AS saleTotalPrice 
+        FROM t_enterprise_orders eo 
+            LEFT JOIN info_enterprise e ON eo.enterprise_id = e.id 
+        WHERE eo.parent_id = #{parentId} 
+            AND eo.created_at >= UNIX_TIMESTAMP(#{startDate}) 
+            AND eo.created_at &lt; UNIX_TIMESTAMP(#{endDate}) 
+            AND eo.status > 2 
+            <if test="childName != null and childName != ''">
+                AND e.name LIKE CONCAT('%', #{childName}, '%') 
+            </if>
+        GROUP BY childName
+    </select>
+    
+    <!-- 查询订单退款数据 -->
+    <select id="queryRefundData" resultType="com.yuntu.sale.report.vo.ChildRefundDataVo">
+        SELECT 
+            eor.child_id AS childId,
+            e.name AS childName,       
+            SUM(eor.num) AS refundAmount, 
+            SUM(eor.deduct_price) AS refundFeeTotalPrice,
+            SUM(eor.refund_price) AS refundTotalPrice
+        FROM t_enterprise_orders_refund eor 
+            LEFT JOIN t_orders_refund r ON eor.refund_id = r.id 
+            LEFT JOIN info_enterprise e ON eor.child_id = e.id 
+        WHERE eor.parent_id = #{parentId} 
+            AND r.audit_time >= UNIX_TIMESTAMP(#{startDate}) 
+            AND r.audit_time &lt; UNIX_TIMESTAMP(#{endDate}) 
+            AND r.status = 1 
+            <if test="childName != null and childName != ''">
+                AND e.name LIKE CONCAT('%', #{childName}, '%') 
+            </if>
+        GROUP BY childName
+    </select>
+
+</mapper>

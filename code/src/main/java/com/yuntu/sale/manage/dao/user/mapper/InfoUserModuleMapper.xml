@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.manage.dao.user.InfoUserModuleDao">
+
+	<sql id="queryColumns">
+		id, 
+		enterprise_id as enterpriseId, 
+		user_id as userId, 
+		module_id, 
+		is_delete, 
+		sort_no, 
+		create_id, 
+		create_time,
+		update_id, 
+		update_time 
+	</sql>
+	
+	<!-- 通过用户Id查询 -->
+	<select id="queryByUser" parameterType="long" resultType="com.yuntu.sale.base.po.user.InfoUserModule">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM info_user_module 
+		WHERE user_id=#{userId} 
+		AND is_delete=0
+		ORDER BY sort_no 
+	</select>
+	
+	<!-- 通过Id查询 -->
+	<select id="queryById" parameterType="long" resultType="com.yuntu.sale.base.po.user.InfoUserModule">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM info_user_module 
+		WHERE id=#{id} 
+	</select>
+
+	<!-- 保存 -->
+	<insert id="insert" parameterType="com.yuntu.sale.base.po.user.InfoUserModule">
+		INSERT INTO info_user_module 
+			(enterprise_id, user_id, module_id, is_delete, sort_no, create_id, create_time, update_id, update_time) 
+		VALUES (
+			#{enterpriseId}, #{userId}, #{moduleId}, #{isDelete}, #{sortNo}, 
+			#{createId}, #{createTime}, #{updateId}, #{updateTime}
+		)
+	</insert>
+	
+	<!-- 修改 -->
+	<update id="update" parameterType="com.yuntu.sale.base.po.user.InfoUserModule">
+		UPDATE info_user_module SET 
+			is_delete=#{isDelete}, 
+			update_id=#{updateId}, 
+			update_time=#{updateTime}
+		WHERE id=#{id} 
+	</update>
+	
+	<!-- 删除用户下的所有模块 -->
+	<delete id="deleteByUser" parameterType="long">
+		DELETE FROM info_user_module WHERE user_id=#{userId} 
+	</delete>
+	
+	<!-- 删除用户下特定模块 -->
+	<delete id="delete" parameterType="hashmap">
+		DELETE FROM info_user_module WHERE user_id=#{userId} and module_id=#{moduleId}
+	</delete>
+	
+	<!-- 通过Id删除 -->
+	<delete id="deleteById" parameterType="long">
+		DELETE FROM info_user_module WHERE id=#{id} 
+	</delete>
+	
+	<!-- 通过用户Id + moduleId查询 -->
+	<select id="queryByUserIdAndModuleId" parameterType="hashmap" resultType="com.yuntu.sale.base.po.user.InfoUserModule">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM info_user_module 
+		WHERE user_id=#{userId} 
+		AND module_id=#{moduleId} 
+	</select>
+	
+</mapper>

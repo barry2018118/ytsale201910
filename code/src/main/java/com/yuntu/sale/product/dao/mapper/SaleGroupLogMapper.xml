@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.product.dao.SaleGroupLogDao">
+    
+	<sql id="saleGroupLogColumns">
+		a.id AS "id",
+		a.operate_flag AS "operateFlag",
+		a.user_ids AS "userIds",
+		a.product_ids AS "productIds",
+		a.create_id AS "createId",
+		a.create_time AS "createTime"
+	</sql>
+
+	<!-- 通过Id查询 -->
+	<select id="queryById" resultType="com.yuntu.sale.product.po.SaleGroupLog">
+		SELECT
+		<include refid="saleGroupLogColumns"></include>
+		FROM t_sale_group_log a
+		WHERE id = #{id}
+	</select>
+
+	<!-- 保存 -->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.product.po.SaleGroupLog">
+		INSERT INTO t_sale_group_log(
+			id,
+			operate_flag,
+			user_ids,
+			product_ids,
+			create_id,
+			create_time
+		) VALUES (
+			#{id},
+			#{operateFlag},
+			#{userIds},
+			#{productIds},
+			#{createId},
+			#{createTime}
+		)
+	</insert>
+
+	<!-- 修改 -->
+	<update id="update" parameterType="com.yuntu.sale.product.po.SaleGroupLog">
+		UPDATE t_sale_group_log SET 	
+			operate_flag = #{operateFlag},
+			user_ids = #{userIds},
+			product_ids = #{productIds},
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

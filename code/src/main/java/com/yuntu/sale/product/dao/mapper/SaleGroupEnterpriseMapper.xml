@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.product.dao.SaleGroupEnterpriseDao">
+    
+	<sql id="saleGroupEnterpriseColumns">
+		a.id AS "id",
+		a.group_id AS "groupId",
+		a.create_enterprise_id AS "createEnterpriseId",
+		a.child_enterprise_id AS "childEnterpriseId",
+		a.is_delete AS "isDelete",
+		a.create_id AS "createId",
+		a.create_time AS "createTime",
+		a.update_id AS "updateId",
+		a.update_time AS "updateTime"
+	</sql>
+	
+	<!-- 通过Id查询 -->
+	<select id="queryById" resultType="com.yuntu.sale.product.po.SaleGroupEnterprise">
+		SELECT
+		<include refid="saleGroupEnterpriseColumns"></include>
+		FROM t_sale_group_enterprise a
+		WHERE a.id = #{id}
+	</select>
+
+	<!-- 保存 -->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.product.po.SaleGroupEnterprise">
+		INSERT INTO t_sale_group_enterprise(
+			id,
+			group_id,
+			create_enterprise_id,
+			child_enterprise_id,
+			is_delete,
+			create_id,
+			create_time,
+			update_id,
+			update_time
+		) VALUES (
+			#{id},
+			#{groupId},
+			#{createEnterpriseId},
+			#{childEnterpriseId},
+			#{isDelete},
+			#{createId},
+			#{createTime},
+			#{updateId},
+			#{updateTime}
+		)
+	</insert>
+
+
+	<!-- 修改 -->
+	<update id="update" parameterType="com.yuntu.sale.product.po.SaleGroupEnterprise">
+		UPDATE t_sale_group_enterprise SET
+			group_id = #{groupId},
+			create_enterprise_id = #{createEnterpriseId},
+			child_enterprise_id = #{childEnterpriseId},
+			update_id = #{updateId},
+			update_time = #{updateTime}
+		WHERE id = #{id}
+	</update>
+
+	<!-- 删除 -->
+	<update id="delete" parameterType="Long">
+		UPDATE
+		t_sale_group_enterprise
+		SET
+		is_delete = 1
+		WHERE
+		id = #{id}
+	</update>
+
+	<!-- 通过分销组分销商列表 -->
+	<select id="querySaleGroupEnterprise" resultType="com.yuntu.sale.product.po.SaleGroupEnterpriseVo">
+		SELECT
+		sgn.id as "id",
+		ie.id as "enterpriseId",
+		ie.name as "name",
+		ie.contacter_name as "contacterName",
+		ie.contacter_phone as "contacterPhone",
+		ie.email as "email"
+		FROM t_sale_group_enterprise AS sgn
+		join info_enterprise AS ie
+		on ie.id=sgn.child_enterprise_id
+		WHERE sgn.is_delete = 0 AND ie.is_delete = 0 AND sgn.group_id = #{groupId} AND sgn.create_enterprise_id = #{createGroupId}
+			<if test="name != null and name != ''">
+				AND ie.contacter_phone like CONCAT('%', #{name}, '%')
+			</if>
+		ORDER BY sgn.create_time DESC
+	</select>
+
+	<!-- 通过Id查询 -->
+	<select id="queryOne" resultType="com.yuntu.sale.product.po.SaleGroupEnterprise">
+		SELECT
+		<include refid="saleGroupEnterpriseColumns"></include>
+		FROM t_sale_group_enterprise a
+		WHERE
+		a.is_delete = 0 AND a.create_enterprise_id = #{createGroupId} AND a.child_enterprise_id = #{childEnterpriseId}
+		<if test="groupId != null and groupId != ''">
+			AND a.group_id = #{groupId}
+		</if>
+	</select>
+
+	<!-- 分销组 - 分销商列表 -->
+	<select id="getEnterPriseList" resultType="com.yuntu.sale.product.po.SaleGroupEnterpriseVo">
+		SELECT
+		sgn.id as "id",
+		sgn.child_enterprise_id as "childEnterpriseId",
+		ie.name as "name",
+		ie.contacter_name as "contacterName",
+		ie.contacter_phone as "contacterPhone",
+		ie.email as "email"
+		FROM t_sale_group_enterprise AS sgn
+		join info_enterprise AS ie
+		on ie.id=sgn.child_enterprise_id
+		WHERE sgn.is_delete = 0 AND ie.is_delete = 0 AND sgn.group_id = #{groupId} AND sgn.create_enterprise_id = #{createGroupId}
+		ORDER BY sgn.create_time DESC
+	</select>
+	
+	<!-- 查询组中已存在的分销商 -->
+    <select id="queryIsExistEnterprise" resultType="com.yuntu.sale.product.po.SaleGroupEnterprise">
+        SELECT
+            <include refid="saleGroupEnterpriseColumns"></include> 
+        FROM t_sale_group_enterprise a 
+        WHERE group_id = #{groupId} 
+        AND is_delete = 0 
+    </select>
+    
+    <!-- 查询企业是否已属于商品组 -->
+    <select id="queryChildIsBePartGroup" resultType="int">
+        SELECT
+            count(*)
+        FROM t_sale_group_enterprise a 
+        WHERE child_enterprise_id = #{enterpriseId} 
+        AND is_delete = 0 
+    </select>
+    
+    <!-- 查询组内可用的企业数量 -->
+    <select id="queryEnterpriseNUm" resultType="int">
+        SELECT count(*) FROM t_sale_group_enterprise sge
+        JOIN info_enterprise e ON sge.child_enterprise_id = e.id  
+        WHERE sge.group_id= #{groupId} 
+        AND sge.is_delete = 0 
+        AND e.is_delete = 0 
+    </select>
+    
+</mapper>

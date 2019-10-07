@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.manage.dao.user.InfoUserRoleDao">
+	<sql id="cols">
+		id,
+		user_id,
+		role_id,
+		sort_no,
+		enterprise_id,
+		create_id,
+		create_time,
+		update_id,
+		update_time
+	</sql>
+	
+	<!-- 通过用户ID查询其下所有的权限组 
+	<select id="query"  parameterType="long" resultType="infoRole">
+		select
+			ir.id id,
+			ir.title title,
+			ir.role_type role_type,
+			ir.descript descript,
+			ir.is_delete is_delete,
+			ir.sort_no sort_no,
+			ir.enterprise_id enterprise_id,
+			ir.create_id create_id,
+			ir.create_time create_time,
+			ir.update_id update_id,
+			ir.update_time update_time
+		from info_user_role ur 
+		left join 
+		info_role ir 
+		on 
+		ur.role_id=ir.id 
+		where 
+		ur.user_id=#{userId}
+		and 
+		ir.is_delete!=1
+	</select>
+	
+	<insert id="insert" parameterType="infoUserRole">
+		insert into info_user_role
+			(user_id,role_id,sort_no,enterprise_id,create_id,create_time,update_id,update_time)
+		values
+			(#{userId},${roleId},${sortNo},${enterpriseId},${createId},
+			${createTime},${updateId},${updateTime})
+	</insert>
+	-->
+	<delete id="delete" parameterType="hashmap">
+		delete from info_user_role where role_id=#{roleId} and user_id=#{userId}
+	</delete>	
+	
+	<delete id="deleteByUserId" parameterType="long">
+		delete from info_user_role where user_id=#{userId}
+	</delete>	
+	
+	<delete id="deleteById" parameterType="long">
+		delete from info_user_role where id=#{id}
+	</delete>
+	
+	<!-- 检查权限组是否与用户有关联 -->
+	<select id="queryCount" resultType="int" parameterType="long">
+		select count(*) from info_user_role where role_id=#{roleId}
+	</select>
+</mapper>

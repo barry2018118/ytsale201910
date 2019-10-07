@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.manage.dao.role.InfoRoleActionDao">
+
+	<sql id="queryColumns">
+		id, 
+		role_id,
+		module_id, 
+		menu_id, 
+		action_id,  
+		sort_no, 
+		create_id ,
+        create_time ,
+        update_id ,
+        update_time
+	</sql>
+	
+	<!-- 查询全部功能动作 -->
+	<select id="queryAll" parameterType="long" resultType="com.yuntu.sale.base.po.role.InfoRoleAction">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM info_role_action 
+		WHERE role_id=#{roleId} 
+		ORDER BY sort_no  
+	</select>
+	
+	<!-- 查询给role分配的功能动作 -->
+	<select id="queryByMenu" parameterType="hashmap" resultType="com.yuntu.sale.base.po.role.InfoRoleAction">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM info_role_action  
+		WHERE role_id=#{roleId} 
+		AND menu_id=#{menuId} 
+		ORDER BY sort_no  
+	</select>
+	
+	<!-- 通过roleId+动作Id查询 -->
+	<select id="queryAction" parameterType="hashmap" resultType="com.yuntu.sale.base.po.role.InfoRoleAction">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM info_role_action  
+		WHERE role_id=#{roleId} 
+		AND action_id=#{actionId} 
+		ORDER BY sort_no  
+	</select>
+	
+	<!-- 通过Id查询 -->
+	<select id="queryById" parameterType="long" resultType="com.yuntu.sale.base.po.role.InfoRoleAction">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM info_role_action 
+		WHERE id=#{id} 
+	</select>
+
+	<!-- 保存 -->
+	<insert id="insert" parameterType="com.yuntu.sale.base.po.role.InfoRoleAction">
+		INSERT INTO info_role_action 
+			(role_id, module_id, menu_id, action_id, sort_no, create_id, create_time, update_id, update_time) 
+		VALUES (
+			#{roleId},  #{moduleId}, #{menuId}, #{actionId}, #{sortNo}, 
+			#{createId}, #{createTime}, #{updateId}, #{updateTime}
+		)
+	</insert>
+	
+	<!-- 删除 -->
+	<delete id="delete" parameterType="long">
+		DELETE FROM info_role_action 
+		WHERE id=#{id} 
+	</delete>
+	<sql id="equeryColumns">
+		fm.id id, 
+		fm.module_id module_id, 
+		fm.menu_id menu_id,
+		fm.name name,
+		fm.icon icon, 
+		fm.url url, 
+		fm.description description, 
+		fm.is_delete is_delete, 
+		fm.sort_no sort_no, 
+		fm.create_id create_id,  
+		from_unixtime(fm.create_time) AS createdTime, 
+		fm.update_id update_id, 
+		from_unixtime(fm.update_time) AS updatedTime 
+	</sql>
+	<!-- 通过roleId查询其下所有action  -->
+	<select id="queryAllByRoleId" parameterType="long" resultType="com.yuntu.sale.base.po.role.InfoRoleAction">
+		select 
+		<include refid="equeryColumns"></include>
+		from info_role_action rm left JOIN func_action fm on rm.action_id=fm.id
+		where rm.role_id=#{roleId} and fm.is_delete!=1;
+	</select>
+	
+	<!-- 通过moduleId和menuId查询actionid -->
+	<select id="queryByModuleAndMenu" parameterType="hashmap" resultType="com.yuntu.sale.base.po.role.InfoRoleAction">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM info_role_action  
+		WHERE role_id=#{roleId} 
+		AND module_id=#{moduleId} 
+		AND menu_id=#{menuId} 
+		ORDER BY sort_no  
+	</select>
+</mapper>

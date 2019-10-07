@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.orders.dao.EnterpriseOrdersRefundDao">
+    
+	<sql id="enterpriseOrdersRefundColumns">
+		a.id AS "id",
+		a.refund_id AS "refundId",
+		a.orders_id AS "ordersId",
+		a.sproduct_id AS "sproductId",
+		a.refund_fee_type AS "refundFeeType",
+		a.refund_fee AS "refundFee",
+		a.child_id AS "childId",
+		a.parent_id AS "parent",
+		a.num AS "num",
+		a.unit_price AS "unitPrice",
+		a.deduct_price AS "deductPrice",
+		a.refund_price AS "refundPrice"
+	</sql>
+	
+	<sql id="enterpriseOrdersRefundJoins">
+	</sql>
+	
+    
+	<select id="get"  resultType="com.yuntu.sale.orders.po.EnterpriseOrdersRefund">
+		SELECT 
+			<include refid="enterpriseOrdersRefundColumns"/>
+		FROM t_enterprise_orders_refund a
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.yuntu.sale.orders.po.EnterpriseOrdersRefund">
+		SELECT 
+			<include refid="enterpriseOrdersRefundColumns"/>
+		FROM t_enterprise_orders_refund a
+		<include refid="enterpriseOrdersRefundJoins"/>
+		<where>
+			
+			<if test="id != null and id != ''">
+				AND a.id = #{id}
+			</if>
+			<if test="refundId != null and refundId != ''">
+				AND a.refund_id = #{refundId}
+			</if>
+			<if test="ordersId != null and ordersId != ''">
+				AND a.orders_id = #{ordersId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	<select id="queryList" resultType="com.yuntu.sale.orders.vo.EnterpriseOrdersRefundVo" >
+		SELECT
+		r.id AS "id",
+		r.orders_id AS "orderId",
+		o.orderno AS "orderNo",
+		r.refund_id AS "refundId",
+		r.sproduct_id AS "productId",
+		p.name AS "productName",
+		r.unit_price AS "fxprise",
+		p.enterprise_id AS "enterpriseId",
+		r.num AS "num",
+		d.notes AS "notes",
+		d.audit_time AS "time",
+		d.create_id AS "creaId" ,
+		i.name AS "creaName",
+		d.audit_id AS "auditId" ,
+		u.name AS "auditName",
+		d.audit_time AS "audittime",
+		d.status AS "state"
+		FROM t_enterprise_orders_refund r
+		LEFT JOIN t_orders o ON r.orders_id = o.id
+		LEFT JOIN t_orders_refund d ON r.refund_id = d.id
+		LEFT JOIN info_user u ON d.audit_id = u.id
+		LEFT JOIN info_user i ON d.create_id = i.id
+		LEFT JOIN t_supplier_product p ON r.sproduct_id = p.id
+		<where>
+			1 = 1
+			<if test="childId != null and childId != ''">
+				AND r.child_id = #{childId}
+			</if>
+			<if test="parentId != null and parentId != ''">
+				AND r.parent_id = #{parentId}
+			</if>
+			<if test="productNo != null and productNo != ''">
+				AND o.orderno LIKE CONCAT('%', #{productNo}, '%')
+			</if>
+			<if test="productName != null and productName != ''">
+				AND p.name LIKE CONCAT('%', #{productName}, '%')
+			</if>
+			<if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+				AND d.create_time BETWEEN UNIX_TIMESTAMP(#{startTime}) AND UNIX_TIMESTAMP(#{endTime})
+			</if>
+			<if test="status != null">
+				AND d.status = #{status}
+			</if>
+		</where>
+		ORDER BY d.create_time DESC
+	</select>
+
+	<select id="queryOne" resultType="com.yuntu.sale.orders.po.EnterpriseOrdersRefund" >
+		SELECT
+		<include refid="enterpriseOrdersRefundColumns"/>
+		FROM t_enterprise_orders_refund a
+		<where>
+			1 = 1
+			<if test="id != null and id != ''">
+				AND a.refund_id = #{id}
+			</if>
+			<if test="childId != null and childId != ''">
+				AND a.child_id = #{childId}
+			</if>
+			<if test="parentId != null and parentId != ''">
+				AND a.parent_id = #{parentId}
+			</if>
+		</where>
+	</select>
+
+	<select id="queryOrder" resultType="com.yuntu.sale.orders.po.EnterpriseOrdersRefund" >
+		SELECT
+		<include refid="enterpriseOrdersRefundColumns"/>
+		FROM t_enterprise_orders_refund a
+		<where>
+			1 = 1
+			<if test="id != null and id != ''">
+				AND a.orders_id = #{id}
+			</if>
+			<if test="childId != null and childId != ''">
+				AND a.child_id = #{childId}
+			</if>
+			<if test="parentId != null and parentId != ''">
+				AND a.parent_id = #{parentId}
+			</if>
+		</where>
+	</select>
+	<insert id="save" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.orders.po.EnterpriseOrdersRefund">
+		INSERT INTO t_enterprise_orders_refund(
+			id,
+			refund_id,
+			orders_id,
+			enterprise_orders_id,
+			sproduct_id,
+			refund_fee_type,
+			refund_fee,
+			child_id,
+			parent_id,
+			num,
+			unit_price,
+			deduct_price,
+			refund_price
+		) VALUES (
+			#{id},
+			#{refundId},
+			#{ordersId},
+			#{enterpriseOrdersId},
+			#{sproductId},
+			#{refundFeeType},
+			#{refundFee},
+			#{childId},
+			#{parent},
+			#{num},
+			#{unitPrice},
+			#{deductPrice},
+			#{refundPrice}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.yuntu.sale.orders.po.EnterpriseOrdersRefund">
+		UPDATE t_enterprise_orders_refund SET 	
+			refund_id = #{refundId},
+			orders_id = #{ordersId},
+			sproduct_id = #{sproductId},
+			refund_fee_type = #{refundFeeType},
+			refund_fee = #{refundFee},
+			child_id = #{childId},
+			parent_id = #{parent},
+			num = #{num},
+			unit_price = #{unitPrice},
+			deduct_price = #{deductPrice},
+			refund_price = #{refundPrice}
+		WHERE id = #{id}
+	</update>
+	
+	
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE t_enterprise_orders_refund SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+
+</mapper>

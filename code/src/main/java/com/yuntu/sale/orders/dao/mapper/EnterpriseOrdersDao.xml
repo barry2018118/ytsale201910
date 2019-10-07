@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.orders.dao.EnterpriseOrdersDao">
+    
+	<sql id="enterpriseOrdersColumns">
+		a.id AS "id",
+		a.orders_id AS "ordersId",
+		a.orderno AS "orderno",
+		a.enterprise_id AS "enterpriseId",
+		a.enterprise_name AS "enterpriseName",
+		a.parent_id AS "parentId",
+		a.parent_name AS "parentName",
+		a.payment_method AS "paymentMethod",
+		a.catid1 AS "catid1",
+		a.type_id AS "typeId",
+		a.sproduct_id AS "sproductId",
+		a.uproduct_id AS "uproductId",
+		a.uproduct_name AS "uproductName",
+		a.num AS "num",
+		a.fx_price AS "fxPrice",
+		a.price AS "price",
+		a.province AS "province",
+		a.city AS "city",
+		a.supplier_id AS "supplierId",
+		a.supplier_name AS "supplierName",
+		a.shop_id AS "shopId",
+		a.shop_name AS "shopName",
+		a.is_order AS "isOrder",
+		a.is_audit AS "isAudit",
+		a.refund_fee_type AS "refundFeeType",
+		a.refund_fee AS "refundFee",
+		a.lockprice AS "lockprice",
+		a.printnum AS "printnum",
+		a.locknum AS "locknum",
+		a.clocknum AS "clocknum",
+		a.is_remind AS "isRemind",
+		a.status AS "status",
+		a.created_id AS "createdId",
+		a.created_by AS "createdBy",
+		a.created_at AS "createdAt",
+		FROM_UNIXTIME(a.created_at,'%Y-%m-%d %H:%m:%s') AS "createdAttime",
+		a.sale_mode AS "saleMode",
+		a.integral AS "integral",
+		a.sintegral AS "sintegral",
+		a.fx_sale AS "fxSale",
+		a.version AS "version",
+		CASE
+            WHEN a.status=1 THEN '等待支付'
+            WHEN a.status=2 THEN '等待发码'
+            WHEN a.status=3 THEN '已全部退款'
+            WHEN a.status=4 THEN '已成功消费'
+            WHEN a.status=5 THEN '全部消费部分退款'
+            WHEN a.status=6 THEN '全部消费全部退款'
+            WHEN a.status=7 THEN '部分消费部分退款'
+            WHEN a.status=10 THEN '未消费'
+            WHEN a.status=11 THEN '未消费部分退款'
+            WHEN a.status=12 THEN '部分消费未退款'
+            WHEN a.status=13 THEN '部分消费部分退款'
+            WHEN a.status=14 THEN '未消费退款审核中'
+            WHEN a.status=15 THEN '已消费退款审核中'
+            WHEN a.status=16 THEN '第三方发码失败'
+            ELSE '其它'
+        END AS "statusName"
+	</sql>
+	
+	<sql id="enterpriseOrdersJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="com.yuntu.sale.orders.po.EnterpriseOrders" >
+		SELECT 
+			<include refid="enterpriseOrdersColumns"/>
+		FROM t_enterprise_orders a
+		<include refid="enterpriseOrdersJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.yuntu.sale.orders.po.EnterpriseOrders" >
+		SELECT 
+			<include refid="enterpriseOrdersColumns"/>
+		FROM t_enterprise_orders a
+		<include refid="enterpriseOrdersJoins"/>
+		<where>
+			1=1
+			<if test="ordersId != null and ordersId != ''">
+				AND a.orders_id = #{ordersId}
+			</if>
+			<if test="orderno != null and orderno != ''">
+				AND a.orderno = #{orderno}
+			</if>
+			<if test="enterpriseId != null and enterpriseId != ''">
+				AND a.enterprise_id = #{enterpriseId}
+			</if>
+			<if test="enterpriseName != null and enterpriseName != ''">
+				AND a.enterprise_name = #{enterpriseName}
+			</if>
+		</where>
+	</select>
+
+	<select id="queryOne" resultType="com.yuntu.sale.orders.po.EnterpriseOrders" >
+		SELECT
+		<include refid="enterpriseOrdersColumns"/>
+		FROM t_enterprise_orders a
+		<where>
+			1=1
+			<if test="id != null and id != ''">
+				AND a.orders_id = #{id}
+			</if>
+			<if test="childId != null and childId != ''">
+				AND a.enterprise_id = #{childId}
+			</if>
+			<if test="parentId != null and parentId != ''">
+				AND a.parent_id = #{parentId}
+			</if>
+		</where>
+	</select>
+
+	<select id="queryList" resultType="com.yuntu.sale.orders.po.EnterpriseOrders" >
+		SELECT
+		<include refid="enterpriseOrdersColumns"/>
+		FROM t_enterprise_orders a
+		JOIN t_orders o ON a.orders_id = o.id 
+		<where>
+			1 = 1
+			<if test="childId != null and childId != ''">
+				AND a.enterprise_id = #{childId}
+			</if>
+			<if test="parentId != null and parentId != ''">
+				AND a.parent_id = #{parentId}
+			</if>
+			<if test="productNo != null and productNo != ''">
+				AND a.orderno LIKE CONCAT('%', #{productNo}, '%')
+			</if>
+			<if test="productName != null and productName != ''">
+				AND a.uproduct_name LIKE CONCAT('%', #{productName}, '%')
+			</if>
+			<if test="linkMan != null and linkMan != ''">
+                AND o.customer_name LIKE CONCAT('%', #{linkMan}, '%')
+            </if>
+            <if test="linkPhone != null and linkPhone != ''">
+                AND o.tel = #{linkPhone} 
+            </if>
+			<if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+				AND a.created_at BETWEEN UNIX_TIMESTAMP(#{startTime}) AND UNIX_TIMESTAMP(#{endTime})
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+		</where>
+		ORDER BY a.created_at DESC
+	</select>
+	
+	<!-- 消费列表-->
+	<select id="queryConsumeList" resultType="com.yuntu.sale.orders.vo.EnterpriseOrdersConsumeVo" >
+		SELECT
+		c.id AS "id",
+		eo.orders_id as "orderId",
+		eo.orderno as "orderNo",
+		FROM_UNIXTIME(eo.created_at,'%Y-%m-%d %H:%m:%s') as "createdTime",
+		eo.sproduct_id as "productId",
+		eo.uproduct_name as "productName",
+		eo.num as "num",
+		FROM_UNIXTIME(c.printtim) as "consumeTime",
+		c.printnum as "consumenum"
+		from t_enterprise_orders eo
+		join t_orders_consume c on eo.orders_id = c.orders_id
+		<where>
+			1 = 1
+			<if test="enterpriseId != null and enterpriseId != ''">
+				AND eo.enterprise_id = #{enterpriseId}
+			</if>
+			<if test="productNo != null and productNo != ''">
+				AND eo.orderno LIKE CONCAT('%', #{productNo}, '%')
+			</if>
+			<if test="productName != null and productName != ''">
+				AND eo.uproduct_name LIKE CONCAT('%', #{productName}, '%')
+			</if>
+		</where>
+		ORDER BY consumeTime desc
+	</select>
+
+	<insert id="save" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.orders.po.EnterpriseOrders" >
+		INSERT INTO t_enterprise_orders(
+			orders_id,
+			orderno,
+			enterprise_id,
+			enterprise_name,
+			parent_id,
+			parent_name,
+			payment_method,
+			catid1,
+			type_id,
+			sproduct_id,
+			uproduct_id,
+			uproduct_name,
+			num,
+			fx_price,
+			price,
+			province,
+			city,
+			supplier_id,
+			supplier_name,
+			shop_id,
+			shop_name,
+			is_order,
+			is_audit,
+			refund_fee_type,
+			refund_fee,
+			lockprice,
+			printnum,
+			locknum,
+			clocknum,
+			is_remind,
+			status,
+			created_id,
+			created_by,
+			created_at,
+			sale_mode,
+			integral,
+			sintegral,
+			fx_sale,
+			version
+		) VALUES (
+			#{ordersId},
+			#{orderno},
+			#{enterpriseId},
+			#{enterpriseName},
+			#{parentId},
+			#{parentName},
+			#{paymentMethod},
+			#{catid1},
+			#{typeId},
+			#{sproductId},
+			#{uproductId},
+			#{uproductName},
+			#{num},
+			#{fxPrice},
+			#{price},
+			#{province},
+			#{city},
+			#{supplierId},
+			#{supplierName},
+			#{shopId},
+			#{shopName},
+			#{isOrder},
+			#{isAudit},
+			#{refundFeeType},
+			#{refundFee},
+			#{lockprice},
+			#{printnum},
+			#{locknum},
+			#{clocknum},
+			#{isRemind},
+			#{status},
+			#{createdId},
+			#{createdBy},
+			#{createdAt},
+			#{saleMode},
+			#{integral},
+			#{sintegral},
+			#{fxSale},
+			#{version}
+		)
+	</insert>
+	
+	<update id="update"  parameterType="com.yuntu.sale.orders.po.EnterpriseOrders" >
+		UPDATE t_enterprise_orders SET 	
+			orders_id = #{ordersId},
+			orderno = #{orderno},
+			enterprise_id = #{enterpriseId},
+			enterprise_name = #{enterpriseName},
+			parent_id = #{parentId},
+			parent_name = #{parentName},
+			payment_method = #{paymentMethod},
+			catid1 = #{catid1},
+			type_id = #{typeId},
+			sproduct_id = #{sproductId},
+			uproduct_id = #{uproductId},
+			uproduct_name = #{uproductName},
+			num = #{num},
+			fx_price = #{fxPrice},
+			price = #{price},
+			province = #{province},
+			city = #{city},
+			supplier_id = #{supplierId},
+			supplier_name = #{supplierName},
+			shop_id = #{shopId},
+			shop_name = #{shopName},
+			is_order = #{isOrder},
+			is_audit = #{isAudit},
+			refund_fee_type = #{refundFeeType},
+			refund_fee = #{refundFee},
+			lockprice = #{lockprice},
+			printnum = #{printnum},
+			locknum = #{locknum},
+			clocknum = #{clocknum},
+			is_remind = #{isRemind},
+			status = #{status},
+			created_id = #{createdId},
+			created_by = #{createdBy},
+			created_at = #{createdAt},
+			sale_mode = #{saleMode},
+			integral = #{integral},
+			sintegral = #{sintegral},
+			fx_sale = #{fxSale},
+			version = #{version}
+		WHERE id = #{id}
+	</update>
+
+</mapper>

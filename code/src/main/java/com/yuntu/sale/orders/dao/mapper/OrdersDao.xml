@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.orders.dao.OrdersDao">
+    
+	<sql id="ordersColumns">
+		a.id AS "id",
+		a.orderno AS "orderno",
+		a.user_id AS "user",
+		a.user_name AS "userName",
+		a.enterprise_id AS "enterpriseId",
+		a.enterprise_name AS "enterpriseName",
+		a.pay_api_id AS "payApiId",
+		a.payid AS "payid",
+		a.type_id AS "typeId",
+		a.sproduct_id AS "sproductId",
+		a.customer_name AS "customerName",
+		a.tel AS "tel",
+		a.idcard AS "idcard",
+		a.consume_time AS "consumeTime",
+		FROM_UNIXTIME(a.consume_time,'%Y-%m-%d') AS "consumeTimeTime",
+		a.unit_price AS "unitPrice",
+		a.price AS "price",
+		a.apimsg AS "apimsg",
+		a.thirdno AS "thirdno",
+		a.trade_no AS "tradeNo",
+		a.paydate AS "paydate",
+		a.tuanname AS "tuanname",
+		a.num AS "num",
+		a.printnum AS "printnum",
+		a.locknum AS "locknum",
+		a.clocknum AS "clocknum",
+		a.notes AS "notes",
+		a.created_at AS "createdAt",
+		FROM_UNIXTIME(a.created_at,'%Y-%m-%d %H:%m:%s') AS "createdAttime",
+		a.status AS "status",
+		a.sendnum AS "sendnum",
+		a.route AS "route",
+		a.team_id AS "teamId",
+		a.guide AS "guide",
+		a.guide_card AS "guideCard",
+		a.province AS "province",
+		a.apptoken AS "apptoken",
+		a.is_chainmode AS "isChainmode",
+		a.phone_province AS "phoneProvince",
+		a.phone_city AS "phoneCity",
+		a.is_zbtimenum AS "isZbtimenum",
+		a.sale_mode AS "saleMode",
+		a.is_tag AS "isTag",
+		a.is_email AS "isEmail",
+		a.version AS "version",
+		a.sendtype AS "sendtype",
+		a.qrcode AS "qrcode",
+		CASE
+            WHEN a.status=1 THEN '等待支付'
+            WHEN a.status=2 THEN '等待发码'
+            WHEN a.status=3 THEN '已全部退款'
+            WHEN a.status=4 THEN '已成功消费'
+            WHEN a.status=5 THEN '全部消费部分退款'
+            WHEN a.status=6 THEN '全部消费全部退款'
+            WHEN a.status=7 THEN '部分消费部分退款'
+            WHEN a.status=10 THEN '未消费'
+            WHEN a.status=11 THEN '未消费部分退款'
+            WHEN a.status=12 THEN '部分消费未退款'
+            WHEN a.status=13 THEN '部分消费部分退款'
+            WHEN a.status=14 THEN '未消费退款审核中'
+            WHEN a.status=15 THEN '已消费退款审核中'
+            WHEN a.status=16 THEN '第三方发码失败'
+            ELSE '其它'
+        END AS "statusName"
+	</sql>
+	
+	<sql id="ordersJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="com.yuntu.sale.orders.po.Orders" >
+		SELECT 
+			<include refid="ordersColumns"/>
+		FROM t_orders a
+		<include refid="ordersJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getByNo" resultType="com.yuntu.sale.orders.po.Orders" >
+		SELECT
+		<include refid="ordersColumns"/>
+		FROM t_orders a
+
+		WHERE a.orderno = #{orderno}
+	</select>
+
+	<select id="queryThirdOrders" resultType="com.yuntu.sale.orders.po.Orders" >
+		SELECT
+			<include refid="ordersColumns"/>
+		FROM t_orders a
+		WHERE
+			1 = 1
+		<if test="tuanname != null and tuanname != ''">
+			AND a.tuanname = #{tuanname}
+		</if>
+		<if test="payId != null and payId != ''">
+			AND a.orderno = #{payId}
+		</if>
+	</select>
+	
+	<select id="findList" resultType="com.yuntu.sale.orders.po.Orders" >
+		SELECT 
+			<include refid="ordersColumns"/>
+		FROM t_orders a
+		<include refid="ordersJoins"/>
+		<where>
+			1 = 1
+			<if test="orderno != null and orderno != ''">
+				AND a.orderno = #{orderno}
+			</if>
+			<if test="user != null and user.id != null and user.id != ''">
+				AND a.user_id = #{user.id}
+			</if>
+		</where>
+	</select>
+
+	<select id="queryList" resultType="com.yuntu.sale.orders.vo.OrdersVo" >
+		SELECT
+		p.name AS "name",
+		<include refid="ordersColumns"/>
+		FROM t_orders a
+		LEFT JOIN t_supplier_product p ON a.sproduct_id = p.id
+		<include refid="ordersJoins"/>
+		<where>
+			1 = 1
+			<if test="childId != null and childId != ''">
+				AND a.user_id = #{childId}
+			</if>
+			<if test="parentId != null and parentId != ''">
+				AND a.enterprise_id = #{parentId}
+			</if>
+			<if test="productNo != null and productNo != ''">
+				AND a.orderno LIKE CONCAT('%', #{productNo}, '%')
+			</if>
+			<if test="productName != null and productName != ''">
+				AND p.name LIKE CONCAT('%', #{productName}, '%')
+			</if>
+			<if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+				AND a.created_at BETWEEN UNIX_TIMESTAMP(#{startTime}) AND UNIX_TIMESTAMP(#{endTime})
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+		</where>
+	</select>
+	<!-- 保存 -->
+	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.orders.po.Orders" >
+		INSERT INTO t_orders(
+			id,
+			orderno,
+			user_id,
+			user_name,
+			enterprise_id,
+			enterprise_name,
+			pay_api_id,
+			payid,
+			type_id,
+			sproduct_id,
+			customer_name,
+			tel,
+			idcard,
+			consume_time,
+			unit_price,
+			price,
+			apimsg,
+			thirdno,
+			trade_no,
+			paydate,
+			tuanname,
+			num,
+			printnum,
+			locknum,
+			clocknum,
+			notes,
+			created_at,
+			status,
+			sendnum,
+			route,
+			team_id,
+			guide,
+			guide_card,
+			province,
+			apptoken,
+			is_chainmode,
+			phone_province,
+			phone_city,
+			is_zbtimenum,
+			sale_mode,
+			is_tag,
+			is_email,
+			version,
+			sendtype,
+			qrcode
+		) VALUES (
+			#{id},
+			#{orderno},
+			#{user},
+			#{userName},
+			#{enterpriseId},
+			#{enterpriseName},
+			#{payApiId},
+			#{payid},
+			#{typeId},
+			#{sproductId},
+			#{customerName},
+			#{tel},
+			#{idcard},
+			#{consumeTime},
+			#{unitPrice},
+			#{price},
+			#{apimsg},
+			#{thirdno},
+			#{tradeNo},
+			#{paydate},
+			#{tuanname},
+			#{num},
+			#{printnum},
+			#{locknum},
+			#{clocknum},
+			#{notes},
+			#{createdAt},
+			#{status},
+			#{sendnum},
+			#{route},
+			#{teamId},
+			#{guide},
+			#{guideCard},
+			#{province},
+			#{apptoken},
+			#{isChainmode},
+			#{phoneProvince},
+			#{phoneCity},
+			#{isZbtimenum},
+			#{saleMode},
+			#{isTag},
+			#{isEmail},
+			#{version},
+			#{sendtype},
+			#{qrcode}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.yuntu.sale.orders.po.Orders" >
+		UPDATE t_orders SET 	
+			orderno = #{orderno},
+			user_id = #{user},
+			user_name = #{userName},
+			enterprise_id = #{enterpriseId},
+			enterprise_name = #{enterpriseName},
+			pay_api_id = #{payApiId},
+			payid = #{payid},
+			type_id = #{typeId},
+			sproduct_id = #{sproductId},
+			customer_name = #{customerName},
+			tel = #{tel},
+			idcard = #{idcard},
+			consume_time = #{consumeTime},
+			unit_price = #{unitPrice},
+			price = #{price},
+			apimsg = #{apimsg},
+			thirdno = #{thirdno},
+			trade_no = #{tradeNo},
+			paydate = #{paydate},
+			tuanname = #{tuanname},
+			num = #{num},
+			printnum = #{printnum},
+			locknum = #{locknum},
+			clocknum = #{clocknum},
+			notes = #{notes},
+			created_at = #{createdAt},
+			status = #{status},
+			sendnum = #{sendnum},
+			route = #{route},
+			team_id = #{teamId},
+			guide = #{guide},
+			guide_card = #{guideCard},
+			province = #{province},
+			apptoken = #{apptoken},
+			is_chainmode = #{isChainmode},
+			phone_province = #{phoneProvince},
+			phone_city = #{phoneCity},
+			is_zbtimenum = #{isZbtimenum},
+			sale_mode = #{saleMode},
+			is_tag = #{isTag},
+			is_email = #{isEmail},
+			version = #{version},
+			sendtype = #{sendtype},
+			qrcode = #{qrcode}
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="delete">
+		UPDATE t_orders SET 
+			status = #{status}
+		WHERE id = #{id}
+	</update>
+
+</mapper>

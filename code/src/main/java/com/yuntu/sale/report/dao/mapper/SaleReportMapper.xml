@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.report.dao.SaleReportDao">
+
+    <!-- 查询订单销售数据 -->
+    <select id="querySaleData" resultType="com.yuntu.sale.finance.vo.FinanceSaleDetailsVo">
+        SELECT 
+            s.name AS scenicName,
+            sp.id AS productId,
+            sp.name AS productName, 
+            eo.fx_price AS unitPrice, 
+            eo.num AS saleAmount, 
+            eo.price AS saleTotalPrice 
+        FROM t_enterprise_orders eo 
+            LEFT JOIN t_orders o ON eo.orders_id = o.id 
+            LEFT JOIN t_supplier_product sp ON eo.sproduct_id = sp.id 
+            LEFT JOIN info_shop s ON sp.scenic_id = s.id 
+        <where>
+            <if test="parentId != null">
+                eo.parent_id = #{parentId} 
+            </if>
+            <if test="childId != null">
+                AND eo.enterprise_id = #{childId} 
+            </if>
+        </where> 
+            AND eo.created_at >= UNIX_TIMESTAMP(#{startDate}) 
+            AND eo.created_at &lt; UNIX_TIMESTAMP(#{endDate}) 
+            AND eo.status > 2 
+            <if test="productName != null and productName != ''">
+                AND eo.uproduct_name LIKE CONCAT('%', #{productName}, '%') 
+            </if>
+    </select>
+    
+    <!-- 查询订单退款数据 -->
+    <select id="queryRefundData" resultType="com.yuntu.sale.finance.vo.FinanceRefundDetailsVo">
+        SELECT 
+            s.name AS scenicName,
+            sp.id AS productId,
+            eo.fx_price AS unitPrice,
+            sp.name AS productName, 
+            eor.num AS refundAmount, 
+            eor.deduct_price AS refundFeeTotalPrice,
+            eor.refund_price AS returnTotalPrice
+        FROM t_enterprise_orders_refund eor 
+            LEFT JOIN t_orders_refund r ON eor.refund_id = r.id 
+            LEFT JOIN t_enterprise_orders eo ON eor.enterprise_orders_id = eo.id 
+            LEFT JOIN t_orders o ON eo.orders_id = o.id 
+            LEFT JOIN t_supplier_product sp ON eor.sproduct_id = sp.id 
+            LEFT JOIN info_shop s ON sp.scenic_id = s.id 
+        <where>
+            <if test="parentId != null">
+                eor.parent_id = #{parentId} 
+            </if>
+            <if test="childId != null">
+                AND eor.child_id = #{childId} 
+            </if>
+        </where> 
+            AND r.audit_time >= UNIX_TIMESTAMP(#{startDate}) 
+            AND r.audit_time &lt; UNIX_TIMESTAMP(#{endDate}) 
+            AND r.status = 1 
+            <if test="productName != null and productName != ''">
+                AND eo.uproduct_name LIKE CONCAT('%', #{productName}, '%') 
+            </if>
+    </select>
+
+</mapper>

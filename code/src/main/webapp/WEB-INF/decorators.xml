@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<decorators defaultdir="/WEB-INF/jsp">
+    
+    <!-- 管理后台默认页 -->
+    <decorator name="default" page="layouts/default.jsp" >
+        <pattern>/manage*</pattern>
+    </decorator>
+    
+    <!-- 剔除URL -->
+    <excludes>
+        <pattern>/static/*</pattern>
+        <pattern>/*/ajax*</pattern>
+        <pattern>/manage/empty</pattern>
+        <pattern>/manage/customer/*</pattern>
+        <pattern>/manage/function/*</pattern>
+        <pattern>/manage/enterprise/*</pattern>
+        <pattern>/manage/user/*</pattern>
+        <pattern>/manage/role/*</pattern>
+        <pattern>/manage/project/*</pattern>
+        <pattern>/manage/product/*</pattern>
+        <pattern>/manage/myProject/*</pattern>
+        <pattern>/manage/project/chart/*</pattern>
+        <pattern>/manage/product/chart/*</pattern>
+        <pattern>/manage/scenicData/*</pattern>
+        <pattern>/manage/scenic/chart/*</pattern>
+        <pattern>/process/*</pattern>
+        <pattern>/analysis/orderDetail/*</pattern>
+        <pattern>/analysis/*</pattern>
+        <pattern>/manage/enterpriseFunc/*</pattern>
+        <pattern>/manage/department/*</pattern>
+        <pattern>/manage/departmentFunc/*</pattern>
+        <pattern>/manage/employee/*</pattern>
+        <pattern>/manage/employeeFunc/*</pattern>
+        <pattern>/manage/test/*</pattern>
+        <pattern>/manage/userFunction/*</pattern>
+        <pattern>/manage/check/*</pattern>
+        <pattern>/capital/receipt/*</pattern>
+        <pattern>/capital/payment/*</pattern>
+        <pattern>/capital/account/*</pattern>
+        <pattern>/capital/historyAccount/*</pattern>
+    </excludes>
+
+</decorators>

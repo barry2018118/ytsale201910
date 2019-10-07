@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.manage.dao.user.InfoUserActionDao">
+
+	<sql id="queryColumns">
+		id, 
+		enterprise_id, 
+		user_id, 
+		module_id, 
+		menu_id, 
+		action_id, 
+		is_delete, 
+		sort_no, 
+		create_id, 
+		create_time, 
+		update_id, 
+		update_time  
+	</sql>
+	
+	<!-- 通过用户Id查询 -->
+	<select id="queryByUserId" parameterType="long" resultType="com.yuntu.sale.base.po.user.InfoUserAction">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM info_user_action 
+		WHERE user_id=#{userId} 
+		AND is_delete=0
+		ORDER BY sort_no 
+	</select>
+	
+	<!-- 通过用户Id查询 -->
+	<select id="queryByUser" parameterType="hashmap" resultType="com.yuntu.sale.base.po.user.InfoUserAction">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM info_user_action 
+		WHERE user_id=#{userId} 
+		AND menu_id=#{menuId} 
+		AND is_delete=0
+		ORDER BY sort_no 
+	</select>
+	
+	<!-- 通过Id查询 -->
+	<select id="queryById" parameterType="long" resultType="com.yuntu.sale.base.po.user.InfoUserAction">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM info_user_action 
+		WHERE id=#{id} 
+	</select>
+
+	<!-- 保存 -->
+	<insert id="insert" parameterType="com.yuntu.sale.base.po.user.InfoUserAction">
+		INSERT INTO info_user_action 
+			(enterprise_id, user_id, module_id, menu_id, action_id, is_delete, sort_no, create_id, create_time, update_id, update_time) 
+		VALUES (
+			#{enterpriseId}, #{userId}, #{moduleId}, #{menuId}, #{actionId}, #{isDelete}, #{sortNo}, 
+			#{createId}, #{createTime}, #{updateId}, #{updateTime}
+		)
+	</insert>
+	
+	<!-- 修改 -->
+	<update id="update" parameterType="com.yuntu.sale.base.po.user.InfoUserAction">
+		UPDATE info_user_action SET 
+			is_delete=#{isDelete}, 
+			update_id=#{updateId}, 
+			update_time=#{updateTime}
+		WHERE id=#{id} 
+	</update>
+	
+	<!-- 删除用户下的所有功能-->
+	<update id="deleteByUser" parameterType="hashmap">
+		DELETE FROM info_user_action WHERE user_id=#{userId} 
+	</update>
+	
+	<!-- 删除用户下特定功能 -->
+	<delete id="delete" parameterType="hashmap">
+		DELETE FROM info_user_action WHERE user_id=#{userId} and action_id=#{actionId}
+	</delete>
+	
+	<!-- 通过Id删除 -->
+	<delete id="deleteById" parameterType="long">
+		DELETE FROM info_user_action WHERE id=#{id} 
+	</delete>
+	
+	<!-- 通过用户Id + actionId查询 -->
+	<select id="queryByUserIdAndActionId" parameterType="hashmap" resultType="com.yuntu.sale.base.po.user.InfoUserAction">
+		SELECT 
+			<include refid="queryColumns"></include> 
+		FROM info_user_action 
+		WHERE user_id=#{userId} 
+		AND action_id=#{actionId} 
+	</select>
+	
+</mapper>

@@ -1,0 +1,32 @@
+
+*{margin:0; padding:0; font-family: "微软雅黑", "microsoft yahei", hei, "Hiragino Sans GB", arial, simsum, sans-serif;}
+body{ font-size:12px; font-weight:500; background:#43d7f1;}
+.left{float:left; }
+.right{float:right;}
+.radius{border-radius: 6px; -moz-border-radius: 6px; -webkit-border-radius: 6px;}
+.top-fix{ min-width:1000px; height:80px; background: #fff; border-bottom:1px solid #dcdcdc; position:relative; z-index:10; }
+.top-fix .header-w{width:100%; margin:0 auto;}
+.header-w img{width:200px; height:40px; margin:20px 0 0 20px;}
+.header-w .right{}
+.header-w .right p{text-align: right; text-align:center;}
+.header-w .right .tel{ float:right; color:#333; font-size:16px; line-height:80px;}
+.header-w .right .time{ float:right; color:#999; font-size:16px; margin-top:14px; margin-right:20px;}
+.header-w .right .time b{ color:#0f99e9; font-size:20px; font-weight:bold;}
+
+.center-fix{ width:100%; height:100%; min-width:1000px;}
+.center-fix .center-w{ width:1000px; height:380px; margin-left:-500px; margin-top:-190px; position:absolute; top:50%; left:50%;}
+.center-w img{width:46%;}
+.login-box{ background: #fff; width:380px; height:365px; box-shadow:0px 0px 16px rgba(0, 0, 0, .2);}
+.login-box h4{width:100%; height:39px; text-align:center; color:#0f99e9; font-size:18px; font-weight: normal; margin-top:20px;}
+.login-box div.inp-box{ width:290px; height:50px; border:1px solid #dcdcdc; margin:0px auto; margin-top:10px;overflow: hidden;}
+div.inp-box span{width:24px; height:24px; margin:12px 0 0 10px;}
+div.inp-box span.user{background:url("../images/fx_user_icon.png") no-repeat; }
+div.inp-box span.pw{background:url("../images/fx_pw_icon.png") no-repeat; }
+div.inp-box input{ height:100%; border:none; outline:none; float:left;font-size:14px; margin-left:10px;font-family: microsoft yahei;width: 230px;background: #fff;}
+div.inp-box .yzm{width:90px; height:36px; background: #eee; margin-top:6px; margin-right:10px;}
+.login-box p{color:#ee2247; margin-top:10px; margin-left:40px;}
+.login-box button{ width:300px; height:50px; line-height: 50px; color:#fff; text-align: center; font-size:18px; background: #0f99e9; margin-top:12px; margin-left:40px; border:none; outline:none; cursor:pointer;}
+.login-box button:hover{ background:#4db6f3;}
+
+.bottom-fix{ min-width:1000px; width:100%; height:40px; line-height: 40px; border-top:1px solid #dcdcdc; color:#666; text-align: center; background: #fcfcfc; 
+position:absolute; bottom:0px; left:0px;}

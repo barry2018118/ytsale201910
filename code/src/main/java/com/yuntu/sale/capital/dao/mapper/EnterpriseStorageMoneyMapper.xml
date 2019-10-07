@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuntu.sale.capital.dao.EnterpriseStorageMoneyDao">
+
+	<sql id="queryColumns">
+		id,
+		parent_id,
+		child_id,
+		storage_money,
+		is_delete
+	</sql>
+
+	<!-- 通过Id查询 -->
+	<select id="queryById" resultType="com.yuntu.sale.capital.po.EnterpriseStorageMoneyPo">
+		SELECT
+		<include refid="queryColumns" />
+		FROM t_enterprise_storage_money
+		WHERE id = #{id} AND is_delete = 0
+	</select>
+
+	<!-- 通过ParentId查询 -->
+	<select id="queryByParentId" resultType="com.yuntu.sale.capital.po.EnterpriseStorageMoneyPo">
+		SELECT
+		<include refid="queryColumns" />
+		FROM t_enterprise_storage_money
+		WHERE parent_id = #{parentId} AND is_delete = 0
+	</select>
+	<!-- 通过ChildId查询 -->
+	<select id="queryByChildId" resultType="com.yuntu.sale.capital.po.EnterpriseStorageMoneyPo">
+		SELECT
+		<include refid="queryColumns" />
+		FROM t_enterprise_storage_money
+		WHERE child_id = #{childId} AND is_delete = 0
+	</select>
+	<!-- 检索查询 -->
+	<select id="querySearch" resultType="com.yuntu.sale.capital.po.EnterpriseStorageMoneyPo">
+		SELECT
+		<include refid="queryColumns" />
+		FROM t_enterprise_storage_money
+		WHERE is_delete = 0 AND child_id = #{childId} AND parent_id = #{parentId}
+	</select>
+
+	<!-- 检索查询预收款供应商 -->
+	<select id="queryMySupplier" resultType="com.yuntu.sale.capital.po.EnterpriseStorageMoneyChasePo">
+		SELECT
+		e.id AS "id",
+		tesm.storage_money AS "storageMoney",
+		e.name AS "name",
+		e.contacter_phone AS "phone",
+		e.status AS "status"
+		FROM t_enterprise_relation AS  er
+		LEFT JOIN info_enterprise AS e ON er.parent_id = e.id
+		LEFT JOIN t_enterprise_storage_money AS tesm ON (tesm.child_id = er.child_id AND tesm.parent_id = er.parent_id)
+		<where> er.child_id = #{childId} AND  e.is_delete = 0
+			<if test="name != null and name != ''">
+				AND name like CONCAT('%', #{name}, '%')
+			</if>
+		</where>
+	ORDER BY e.status DESC,e.create_time DESC
+	</select>
+
+	<!-- 资金管理 - 预存款 - 分销商列表 -->
+	<select id="queryMyDistributor" resultType="com.yuntu.sale.capital.po.EnterpriseStorageMoneyChasePo">
+		SELECT
+		e.id as "id",
+		tesm.storage_money as "storageMoney",
+		e.name as "name",
+		e.contacter_phone as "phone",
+		e.status as "status"
+		FROM t_enterprise_relation AS  er
+		LEFT JOIN info_enterprise AS e ON er.child_id = e.id
+		LEFT JOIN t_enterprise_storage_money AS tesm ON (tesm.child_id = er.child_id AND tesm.parent_id = er.parent_id)
+		<where> er.parent_id = #{parentId} AND  e.is_delete = 0
+			<if test="name != null and name != ''">
+				AND name like CONCAT('%', #{name}, '%')
+			</if>
+		</where>
+		ORDER BY e.status DESC,e.create_time DESC
+	</select>
+
+	<!-- 新增 -->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuntu.sale.capital.po.EnterpriseStorageMoneyPo">
+		INSERT INTO t_enterprise_storage_money(
+		<include refid="queryColumns" />
+		) VALUES (
+		#{id},
+		#{parentId},
+		#{childId},
+		#{storageMoney},
+		#{isDelete}
+		)
+	</insert>
+	<!-- 修改 -->
+	<update id="save" parameterType="com.yuntu.sale.capital.po.EnterpriseStorageMoneyPo">
+		UPDATE
+		t_enterprise_storage_money
+		SET
+		parent_id = #{parentId},
+		child_id  = #{childId},
+		storage_money = #{storageMoney}
+		WHERE
+		id = #{id}
+	</update>
+
+</mapper>

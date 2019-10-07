@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.orders.dao.ReprintDao">
+    
+	<sql id="reprintColumns">
+		a.id AS "id",
+		a.consume_log_id AS "consumeLogId",
+		a.orders_id AS "ordersId",
+		a.shop_id AS "shopId",
+		a.shop_name AS "shopName",
+		a.sproduct_id AS "sproductId",
+		a.product_sortname AS "productSortname",
+		a.sharepos_uid AS "shareposUid",
+		a.cardpwd AS "cardpwd",
+		a.machineid AS "machineid",
+		a.printtim AS "printtim"
+	</sql>
+	
+	<sql id="reprintJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="com.yuntu.sale.orders.po.Reprint">
+		SELECT 
+			<include refid="reprintColumns"/>
+		FROM t_reprint a
+		<include refid="reprintJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.yuntu.sale.orders.po.Reprint">
+		SELECT 
+			<include refid="reprintColumns"/>
+		FROM t_reprint a
+		<include refid="reprintJoins"/>
+		<where>
+			
+			<if test="consumeLogId != null and consumeLogId != ''">
+				AND a.consume_log_id = #{consumeLogId}
+			</if>
+			<if test="ordersId != null and ordersId != ''">
+				AND a.orders_id = #{ordersId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="com.yuntu.sale.orders.po.Reprint">
+		SELECT 
+			<include refid="reprintColumns"/>
+		FROM t_reprint a
+		<include refid="reprintJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_reprint(
+			id,
+			consume_log_id,
+			orders_id,
+			shop_id,
+			shop_name,
+			sproduct_id,
+			product_sortname,
+			sharepos_uid,
+			cardpwd,
+			machineid,
+			printtim
+		) VALUES (
+			#{id},
+			#{consumeLogId},
+			#{ordersId},
+			#{shopId},
+			#{shopName},
+			#{sproductId},
+			#{productSortname},
+			#{shareposUid},
+			#{cardpwd},
+			#{machineid},
+			#{printtim}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_reprint SET 	
+			consume_log_id = #{consumeLogId},
+			orders_id = #{ordersId},
+			shop_id = #{shopId},
+			shop_name = #{shopName},
+			sproduct_id = #{sproductId},
+			product_sortname = #{productSortname},
+			sharepos_uid = #{shareposUid},
+			cardpwd = #{cardpwd},
+			machineid = #{machineid},
+			printtim = #{printtim}
+		WHERE id = #{id}
+	</update>
+	
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE t_reprint SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

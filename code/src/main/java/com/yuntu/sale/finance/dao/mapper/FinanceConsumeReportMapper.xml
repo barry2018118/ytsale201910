@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.sale.finance.dao.FinanceConsumeReportDao">
+
+	<!-- 查询订单消费数据 -->
+	<select id="queryConsumeData" resultType="com.yuntu.sale.finance.vo.FinanceConsumeDetailsVo">
+		SELECT 
+            o.orderno AS orderNo, 
+            o.payid AS supplierOrderNo,
+            o.thirdno AS buyerOrderNo, 
+            c.card_pwd AS code, 
+            s.name AS scenicName, 
+            sp.id AS productId,
+            sp.name AS productName, 
+            eo.fx_price AS consumePrice, 
+            c.printnum AS consumeAmount, 
+            (eo.fx_price * c.printnum) AS consumeTotalPrice,
+            o.customer_name AS customerName, 
+            o.tel AS customerTel, 
+            o.idcard AS idCard,
+            SUBSTRING(FROM_UNIXTIME(c.printtim), 1, 19) AS consumeTime 
+        FROM t_orders_consume c
+        LEFT JOIN t_enterprise_orders eo ON c.orders_id = eo.orders_id AND c.sproduct_id = eo.sproduct_id
+        LEFT JOIN t_orders o ON eo.orders_id = o.id 
+        LEFT JOIN t_supplier_product sp ON eo.sproduct_id=sp.id 
+        LEFT JOIN info_shop s ON sp.scenic_id = s.id 
+        <where>
+            <if test="childId!=0">
+                eo.enterprise_id = #{childId} 
+            </if>
+            <if test="parentId!=0">
+                AND eo.parent_id = #{parentId} 
+            </if>
+        </where> 
+        AND c.printtim >= UNIX_TIMESTAMP(#{startDate}) 
+        AND c.printtim &lt; UNIX_TIMESTAMP(#{endDate}) 
+        ORDER BY c.printtim 
+	</select>
+	
+</mapper>
