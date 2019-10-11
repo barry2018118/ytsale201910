@@ -48,7 +48,7 @@
         <ant.version>1.9.2</ant.version>
         <guava.version>18.0</guava.version>
         <sitemesh.version>2.4.2</sitemesh.version>
-        <netty.version>4.0.18.Final</netty.version>
+        <netty.version>4.1.42.Final</netty.version>
         <servlet.version>3.0.1</servlet.version>
         <jsp.version>2.2</jsp.version>
         <jstl.version>1.2</jstl.version>
