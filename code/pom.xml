@@ -45,7 +45,7 @@
         <logback.version>1.1.2</logback.version>
         <quartz.version>1.8.6</quartz.version>
         <httpclient.version>4.5.2</httpclient.version>
-        <ant.version>1.9.2</ant.version>
+        <ant.version>1.10.9</ant.version>
         <guava.version>18.0</guava.version>
         <sitemesh.version>2.4.2</sitemesh.version>
         <netty.version>4.0.18.Final</netty.version>
